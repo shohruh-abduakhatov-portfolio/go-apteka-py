@@ -1,0 +1,67 @@
+{% extends "../base.html" %}
+{% block header %}
+
+{% end %}
+{% block content %}
+<div class="px-3 mx-auto text-center">
+  <h1 class="display-4">Страница синонимов</h1>
+  <p class="lead">Здесь будет список синонимов продуктов</p>
+</div>
+<table id="example" class="table table-striped table-bordered tasks-table" style="width:100%">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Алиас</th>
+            <th>Товар</th>
+            <th>Производитель</th>
+            <th>Действие</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+    <tfoot>
+        <tr>
+            <th>ID</th>
+            <th>Алиас</th>
+            <th>Товар</th>
+            <th>Производитель</th>
+            <th>Действие</th>
+        </tr>
+    </tfoot>
+</table>
+{% end %}
+
+{% block bottom %}
+<script>
+    $(document).ready(function() {
+        var table = $('#example').DataTable({
+        oLanguage: {
+          "sUrl": "https://cdn.datatables.net/plug-ins/1.10.19/i18n/Russian.json"
+        },
+        responsive: true,
+        serverSide: true,
+        createdRow: function( row, data, dataIndex ) {
+            var d = data[0];
+            $(row).attr('data-id', d);
+        },
+        ajax: '/products/aliases/data.json',
+        "columnDefs": [ {
+          "targets": -1,
+          "data": null,
+          "defaultContent": '<button type="button" class="btn btn-success mr-4">Сохранить</button><button type="button" class="btn btn-danger btn-remove-row"><i class="fa fa-remove"></i></button>'
+        } ]
+      });
+    $('#example tbody').on( 'click', '.btn-remove-row', function () {
+      $(this).closest('tr').addClass("selected");
+     table.row('.selected').remove().draw( true );
+    } );
+    
+    } );
+
+    function areSameDate(d1, d2) {
+    return d1.getFullYear() == d2.getFullYear()
+        && d1.getMonth() == d2.getMonth()
+        && d1.getDate() == d2.getDate();
+}
+</script>
+{% end %}

@@ -1,0 +1,35 @@
+{% extends "../base.html" %}
+{% block header %}
+
+{% end %}
+{% block body %}
+<div class="container">
+<div class="shadow p-4 mb-4 bg-white">
+    <div class="x-3 pb-md-4 mx-auto">
+        <h3 class="display-5 agent-header">Найдено <strong>{{ len(dublicates) }}</strong> дубликатов</h3>
+    <hr>
+    <div>
+    {% set name = None %}
+    {% for dublicate in dublicates %}
+
+        {% if name != dublicate["name"] %}
+        {% if name is not None %}
+        <hr>
+        {% end %}
+        {% set name = dublicate["name"] %}
+        {% end %}
+
+    <div>
+        Товар: <a href="/products/{{ dublicate["product_id"] }}/view">{{ dublicate["name"] }}</a>
+        Производитель: <a href="/products/manufacturer/{{ dublicate["manufacturer_id"] }}/view">{{ dublicate["manufacturer"] }}</a>
+        Категория: {{ dublicate["category"] }}
+    </div>
+    {% end %}
+    </div>
+</div>
+</div>
+</div>
+{% end %}
+
+{% block bottom %}
+{% end %}

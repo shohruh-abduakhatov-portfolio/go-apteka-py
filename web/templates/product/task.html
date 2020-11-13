@@ -1,0 +1,1022 @@
+{% from web.handlers.BaseHandler import Role %}
+{% extends "base.html" %}
+
+{% block head %}
+<style>
+.filtering select {
+    padding: 6px 10px;
+    -webkit-appearance: none;
+    vertical-align: top;
+}
+.filtering fieldset {
+    min-width: auto;
+    padding: 0;
+    margin: 2px 0;
+    border: 0;
+    display: inline-block;
+}
+.filtering legend {
+    font-size: 1rem;
+    margin-bottom: 0;
+}
+.filtering-item {
+    border-left: 1px solid #ccc;
+    padding-left: 12px;
+    border-bottom: 1px solid #ccc;
+}
+.filtering .btn-warning {
+}
+.create-synonym-block {
+    background: #e2e3e5;
+}
+.table-striped tbody tr.already {
+    background-color: rgba(50,164,50,.5);
+}
+
+#add-product .modal-dialog {
+    min-width: 50vw;
+}
+.sticky {
+    position:fixed;
+    top:0;
+    left:0;
+    right:0;
+    background: #fff;
+    padding: 0 25px;
+}
+</style>
+{% end %}
+{% block content %}
+<div class="center-block text-center">
+    {% if waiting_upload_count == 0 %}
+    <h1>Проблемы отсутствуют</h1>
+    <div style="font-size:14em;font-weight:100" class="text-success">
+        <i class="fa fa-smile-o" aria-hidden="true"></i>
+    </div>
+    {% else %}
+        <div style="text-align:left;">
+        {% for uncomplete in uncompleted %}
+            <div class="zzz" {% if uncomplete["result"]["type"] == "ok" %}style="background: #d4edda;" {% end %}>
+                <div class="row">
+                    <h5 class="ml-3 py-2 headline" style="display:flex; flex:1;">
+                        <strong>{{ uncomplete["title"] }}</strong> 
+                        <small class="ml-2">{{ uncomplete["manufacturer"] }}</small>
+                    </h5>
+                    {% if uncomplete["result"]["type"] != "ok" %}
+                        <div>
+                            <button class="btn btn-secondary btn-test-alternative"><i class="fa fa-bolt text-warning mr-2"></i>Тест</button>
+                            <button class="btn btn-primary btn-search-alternative">Поиск</button>
+                        </div>
+                    {% else %}
+                    <div>
+                    <button class="btn btn-secondary btn-test-alternative"><i class="fa fa-bolt text-warning mr-2"></i>Тест</button>
+                    <button class="btn btn-primary btn-search-alternative">Поиск</button>
+                    </div>
+                    {% end %}
+                </div>
+                
+                <div class="filtering">
+                {% if uncomplete["result"]["type"] == "ok" %}
+                    
+                    {% for product_id, alternative in uncomplete["result"]["alternatives"].items() %}
+                        <div class="inner-parent {% if "result" in uncomplete["result"] and uncomplete["result"]["result"]["product_id"] != product_id %} mx-4 {% end %}">
+                        <div  data-id="{{ product_id}}" class="toggleable {% if "result" in uncomplete["result"] and uncomplete["result"]["result"]["product_id"] != product_id %} toggleable-inner {% end %}" style="{% if "result" in uncomplete["result"] and uncomplete["result"]["result"]["product_id"] != product_id %} display:none; {% end %}" >
+                        <h6 class="row">
+                        <a href="#" class="btn 
+                        {% if "result" in uncomplete["result"] and uncomplete["result"]["result"]["product_id"] == product_id %} btn-success {% else %} btn-warning  {% end %}
+                        toggle-view mr-3" data-id="tt-{{ product_id}}" ><i class="fa fa-expand"></i></a>
+                        <div>
+                            <a class="pname" target="_blank" href="https://cp.goapteka.uz/products/{{ product_id }}/view/">{{ alternative["product"]["name"] }}</a>
+                            <div class="mname">{{ alternative["product"]["manufacturer"] }}</div>
+                        </div>
+                        </h6>
+                        
+                        <div class="filtering-item mb-2" style="display:none;">
+                        
+                        <fieldset class="mr-1 mb-2">
+                            <legend>name</legend>
+                            <select>
+                            {% for name, q in alternative["name"].items() %}
+                            <option value="name">{{ name }}</option>
+                            {% end %}
+                            </select>
+                            <a href="#" data-key="name" data-id="{{ product_id }}" class="open-rule btn btn-primary"><i class="fa fa-plus"></i></a>
+                        </fieldset>
+
+                        <fieldset class="mr-1 mb-2">
+                            <legend>manufacturer_s</legend>
+                            <select>
+                            {% for name, q in alternative["manufacturer_s"].items() %}
+                            <option value="name">{{ name }}</option>
+                            {% end %}
+                            </select>
+                            <a href="#" data-key="manufacturer_s" data-id="{{ alternative["manufacturer"] }}" class="open-rule btn btn-warning"><i class="fa fa-plus"></i></a>
+                        </fieldset>
+
+                        <fieldset class="mr-1 mb-2">
+                            <legend>dosage_form</legend>
+                            <select>
+                            {% for name, q in alternative["dosage_form"].items() %}
+                            <option value="name">{{ name }}</option>
+                            {% end %}
+                            </select>
+                            <a href="#" data-key="dosage_form" data-id="{{ product_id }}" class="open-rule btn btn-primary"><i class="fa fa-plus"></i></a>
+                        </fieldset>
+
+                        <fieldset class="mr-1 mb-2">
+                            <legend>dosage_size_1</legend>
+                            <select>
+                            {% for name, q in alternative["dosage_size_1"].items() %}
+                            <option value="name">{{ name }}</option>
+                            {% end %}
+                            </select>
+                            <a href="#" data-key="dosage_size_1" data-id="{{ product_id }}" class="open-rule btn btn-primary"><i class="fa fa-plus"></i></a>
+                        </fieldset>
+
+                        <fieldset class="mr-1 mb-2">
+                            <legend>volume</legend>
+                            <select>
+                            {% for name, q in alternative["volume"].items() %}
+                            <option value="name">{{ name }}</option>
+                            {% end %}
+                            </select>
+                            <a href="#" data-key="volume" data-id="{{ product_id }}" class="open-rule btn btn-primary"><i class="fa fa-plus"></i></a>
+                        </fieldset>
+
+                        <fieldset class="mr-1 mb-2">
+                            <legend>quantity</legend>
+                            <select>
+                            {% for name, q in alternative["quantity"].items() %}
+                            <option value="name">{{ name }}</option>
+                            {% end %}
+                            </select>
+                            <a href="#" data-key="quantity" data-id="{{ product_id }}" class="open-rule btn btn-primary"><i class="fa fa-plus"></i></a>
+                        </fieldset>
+
+
+                        
+
+                        <fieldset class="mr-1 mb-2">
+                            <legend>marker</legend>
+                            <select>
+                            {% for name, q in alternative["marker"].items() %}
+                            <option value="name">{{ name }}</option>
+                            {% end %}
+                            </select>
+                            <a href="#" data-key="marker" data-id="{{ product_id }}" class="open-rule btn btn-primary"><i class="fa fa-plus"></i></a>
+                        </fieldset>
+
+                        
+                        
+                        <fieldset class="mr-1 mb-2">
+                            <legend>marker2</legend>
+                            <select>
+                            {% for name, q in alternative["marker2"].items() %}
+                            <option value="name">{{ name }}</option>
+                            {% end %}
+                            </select>
+                            <a href="#" data-key="marker2" data-id="{{ product_id }}" class="open-rule btn btn-primary"><i class="fa fa-plus"></i></a>
+                        </fieldset>
+                        </div>
+                        </div>
+                        </div>
+                    {% end %}
+                    <div style="text-align:right;">
+                        <a href="#" class="btn btn-info btn-expand-all" ><i class="fa fa-expand"></i> Развернуть все ({{ len(uncomplete["result"]["alternatives"]) - 1 }})</a>
+                    </div>
+                {% end %}
+
+                {% if uncomplete["result"]["type"] == "ambiguous" %}
+                    
+                    {% for product_id, alternative in uncomplete["result"]["alternatives"].items() %}
+                        <div class="toggleable" data-id="{{ product_id}}">
+                        <h6 class="row">
+                        <a href="#" class="btn 
+                        {% if "result" in uncomplete["result"] and uncomplete["result"]["result"]["product_id"] == product_id %} btn-success {% else %} btn-warning  {% end %}
+                        toggle-view mr-3" data-id="tt-{{ product_id}}" ><i class="fa fa-expand"></i></a>
+                        <div>
+                            <a class="pname" target="_blank" href="https://cp.goapteka.uz/products/{{ product_id }}/view/">{{ alternative["product"]["name"] }}</a>
+                            <div class="mname">{{ alternative["product"]["manufacturer"] }}</div>
+                        </div>
+                        </h6>
+                        
+                        <div class="filtering-item mb-2" style="display:none;">
+                        
+                        <fieldset class="mr-1 mb-2">
+                            <legend>name</legend>
+                            <select>
+                            {% for name, q in alternative["name"].items() %}
+                            <option value="name">{{ name }}</option>
+                            {% end %}
+                            </select>
+                            <a href="#" data-key="name" data-id="{{ product_id }}" class="open-rule btn btn-primary"><i class="fa fa-plus"></i></a>
+                        </fieldset>
+
+                        <fieldset class="mr-1 mb-2">
+                            <legend>manufacturer_s</legend>
+                            <select>
+                            {% for name, q in alternative["manufacturer_s"].items() %}
+                            <option value="name">{{ name }}</option>
+                            {% end %}
+                            </select>
+                            <a href="#" data-key="manufacturer_s" data-id="{{ alternative["manufacturer"] }}" class="open-rule btn btn-warning"><i class="fa fa-plus"></i></a>
+                        </fieldset>
+
+                        <fieldset class="mr-1 mb-2">
+                            <legend>dosage_form</legend>
+                            <select>
+                            {% for name, q in alternative["dosage_form"].items() %}
+                            <option value="name">{{ name }}</option>
+                            {% end %}
+                            </select>
+                            <a href="#" data-key="dosage_form" data-id="{{ product_id }}" class="open-rule btn btn-primary"><i class="fa fa-plus"></i></a>
+                        </fieldset>
+
+                        <fieldset class="mr-1 mb-2">
+                            <legend>dosage_size_1</legend>
+                            <select>
+                            {% for name, q in alternative["dosage_size_1"].items() %}
+                            <option value="name">{{ name }}</option>
+                            {% end %}
+                            </select>
+                            <a href="#" data-key="dosage_size_1" data-id="{{ product_id }}" class="open-rule btn btn-primary"><i class="fa fa-plus"></i></a>
+                        </fieldset>
+
+                        <fieldset class="mr-1 mb-2">
+                            <legend>volume</legend>
+                            <select>
+                            {% for name, q in alternative["volume"].items() %}
+                            <option value="name">{{ name }}</option>
+                            {% end %}
+                            </select>
+                            <a href="#" data-key="volume" data-id="{{ product_id }}" class="open-rule btn btn-primary"><i class="fa fa-plus"></i></a>
+                        </fieldset>
+
+                        <fieldset class="mr-1 mb-2">
+                            <legend>quantity</legend>
+                            <select>
+                            {% for name, q in alternative["quantity"].items() %}
+                            <option value="name">{{ name }}</option>
+                            {% end %}
+                            </select>
+                            <a href="#" data-key="quantity" data-id="{{ product_id }}" class="open-rule btn btn-primary"><i class="fa fa-plus"></i></a>
+                        </fieldset>
+
+
+                        
+
+                        <fieldset class="mr-1 mb-2">
+                            <legend>marker</legend>
+                            <select>
+                            {% for name, q in alternative["marker"].items() %}
+                            <option value="name">{{ name }}</option>
+                            {% end %}
+                            </select>
+                            <a href="#" data-key="marker" data-id="{{ product_id }}" class="open-rule btn btn-primary"><i class="fa fa-plus"></i></a>
+                        </fieldset>
+
+                        
+                        
+                        <fieldset class="mr-1 mb-2">
+                            <legend>marker2</legend>
+                            <select>
+                            {% for name, q in alternative["marker2"].items() %}
+                            <option value="name">{{ name }}</option>
+                            {% end %}
+                            </select>
+                            <a href="#" data-key="marker2" data-id="{{ product_id }}" class="open-rule btn btn-primary"><i class="fa fa-plus"></i></a>
+                        </fieldset>
+                        </div>
+                        </div>
+                    {% end %}
+
+                {% end %}
+                </div>
+            </div>
+            <hr>
+        {% end %}
+        </div>
+    {% end %}
+
+    <a href="/products/tasks/{{ supplier_id }}/view/?o={{ offset }}">дальше</a>
+</div>
+<div class="modal" id="manage-rule" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+      <div class="row">
+        <div class="modal-primary col-sm"></div>
+        <div class="modal-form col-sm">
+         <div class="form-group">
+            <label for="rule-value">Название</label>
+            <input type="text" class="form-control" id="rule-value" aria-describedby="emailHelp" placeholder="Введите название">
+        </div>
+            <a href="#" class="btn btn-primary" id="add-rule">Добавить</a>
+        </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="create-manufacturer-modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Создание синонима производителя</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form action="/" id="create-manufacturer-form">
+            <div class="form-group">
+                <label for="rule-value">Название</label>
+                <input type="text" id="manufacturer-synonym-name" class="form-control" name="name" placeholder="Введите название товара">
+            </div>
+            <div class="form-group">
+                <label for="rule-value">Синонимы</label>
+                <input type="text" id="manufacturer-synonym-items" class="form-control" name="synonym" placeholder="Перечислите синонимы через ;">
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <a href="#" class="btn btn-primary" id="create-synonym-button">Добавить</a>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="add-product" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Создание товара</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form action="/" id="create-product">
+            <div class="form-group">
+                <label for="rule-value">Название</label>
+                <input type="text" id="product-name" class="form-control" name="name" placeholder="Введите название товара">
+            </div>
+            <div class="form-group">
+                <label for="rule-value">Производитель</label>
+                <p><strong id="product-manufacturer"></strong></p>
+                <input type="text" class="form-control" id="manufacturer-search" name="manufacturer" placeholder="Введите производителя">
+                <input type="text" id="product-manufacturer-id" name="manufacturer_id">
+                <div id="new-manufacturer-warning" style="display:none;" class="text-danger my-2">
+                <i class="fa fa-warning "></i> <strong>Производитель не выбран, будет создан новый!</strong>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="rule-value">Общее название</label>
+                <input type="text" class="form-control" name="parent_name" placeholder="Общее название">
+            </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <a href="#" class="btn btn-primary" id="create-product-button">Добавить</a>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="manage-search" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body" style="min-width:50vw;">
+        <a href="#" class="btn btn-primary" id="add-new-product">Создать новый товар</a>
+        <hr>
+        <table id="example" class="table table-striped table-bordered tasks-table" style="width:100%">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Товар</th>
+                    <th>Производитель</th>
+                    <th>Кол-во товара</th>
+                    <th>Файл</th>
+                    <th>Дата</th>
+                </tr>
+            </thead>
+            <tbody>
+            </tbody>
+            <tfoot>
+                <tr>
+                    <th>ID</th>
+                    <th>Товар</th>
+                    <th>Производитель</th>
+                    <th>Кол-во товара</th>
+                    <th>Файл</th>
+                    <th>Дата</th>
+                </tr>
+            </tfoot>
+        </table>
+           
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% end %}
+
+{% block bottom %}
+<script>
+$(window).scroll(function(){
+    var latest = undefined;
+    $('h5.headline').removeClass('sticky');
+    $('h5.headline').removeClass('shadow');
+    $('h5.headline').each(function(){
+        var sticky = $(this)[0].offsetTop;
+        if (window.pageYOffset > sticky - 150) {
+            latest = $(this);
+        } else {
+        }
+    });
+    console.log(latest);
+    if(latest != undefined) {
+        latest.addClass("sticky");
+        latest.addClass("shadow");
+    }
+})
+var ignore = [];
+var manufacturer_selected = "";
+$(document).ready(function(){
+    var token = Cookies.get("_xsrf");
+    $.ajaxSetup({
+    headers: {
+        "X-XSRFToken": token
+    }
+    });
+
+    $('#create-synonym-button').click(function(e){
+        e.preventDefault();
+        $('#create-synonym-button').attr('disabled', 'disabled');
+        $('#create-manufacturer-form').submit();
+    });
+    $('#create-manufacturer-form').submit(function(e){
+        var name = $('#manufacturer-synonym-name').val();
+        if (name.length == 0) {
+            return;
+        }
+        var values = {};
+        var k = $('#manufacturer-synonym-items').val().split(";")
+        for (var i=0;i<k.length;i++) {
+            var z = k[i];
+            values[z] = 0;
+        }
+        if (k.length == 0) {
+            return;
+        }
+        var data= {"value": JSON.stringify(values), "name": name};
+
+        e.preventDefault();
+        $.ajax({
+            url: "/manufacturers/synonym/add/",
+            type: "post",
+            data: data,
+            dataType: "json",
+            error: function(data) {
+                alert("error");
+                $('#create-synonym-button').removeAttr('disabled');
+            },
+            success: function(data) {
+                console.log(data);
+                $('#create-synonym-button').removeAttr('disabled');
+                $('#create-manufacturer-modal').modal('hide');
+            }
+        });
+        return false;
+    });
+
+    $(document.body).on('click', '.create-manufacturer', function(e){
+        e.preventDefault();
+        var m = $(this).closest('.filtering').find('.synonym-manufacturer-name').text();
+        $('#manufacturer-synonym-name').val(m);
+        $('#create-manufacturer-modal').modal({});
+        $('#manufacturer-synonym-items').focus();
+    });
+
+    $('#create-product-button').click(function(e) {
+        e.preventDefault();
+        $('#create-product').submit();
+    });
+    
+    $('#manufacturer-search').autocomplete({
+        serviceUrl: '/manufacturer/autocomplete/query/',
+        groupBy: 'category',
+        width: 'flex',
+        onSelect: function (suggestion) {
+            console.log(suggestion);
+            $('#product-manufacturer-id').val(suggestion.data["manufacturer_id"]);
+            $('#new-manufacturer-warning').hide();
+        },
+        onInvalidateSelection: function(){
+            console.log("invalidate");
+            $('#product-manufacturer-id').val("");
+            $('#new-manufacturer-warning').show();
+        }
+    });
+
+    $('#create-product').submit(function(e) {
+        e.preventDefault();
+        var title = $('#product-name').val();
+        var manufacturer = $('#manufacturer-search').val();
+        $.ajax({
+            url: "/products/add/",
+            type: "post",
+            data: $('#create-product').serialize(),
+            dataType: "json",
+            error: function(data) {
+                alert("error");
+            },
+            success: function(data) {
+                console.log(data);
+                // todo
+                addAlternative(data["product_id"], title, manufacturer);
+
+                $('#add-product').modal('hide');
+            }
+        });
+    });
+
+    $('#add-new-product').click(function(e){
+        e.preventDefault();
+        $('#manage-search').modal('hide');
+        $('#add-product').modal({});
+        var title = $('#manage-search .modal-title strong').text();
+        var manufacturer = $('#manage-search .modal-title small').text();
+        $('#product-name').val(title);
+        $('#product-manufacturer').html(manufacturer);
+        $('#manufacturer-search').focus();
+    });
+
+    var values;
+    var currentProductBlock;
+    $(document.body).on('click', '.toggle-view', function(e){
+        e.preventDefault();
+
+        $(this).closest('.toggleable').find('.filtering-item').toggle();
+    });
+    $(document.body).on('click', '.open-rule', function(e){
+        e.preventDefault();
+        var key = $(this).attr("data-key");
+        var title;
+        var did = $(this).attr("data-id");
+        if (key == "manufacturer_s") {
+            title = $(this).closest('.toggleable').find(".mname").text();
+        } else {
+        title = $(this).closest('.toggleable').find(".pname").text(); 
+        }
+        $('#manage-rule').find(".modal-title").html(title);
+
+        var options = [];
+        values = {};
+        $($(this).siblings()[1]).find('option').each(function(){
+            options.push($(this).text());
+        });
+        var html = "";
+        for (var i =0; i < options.length; i++) {
+            var option = options[i];
+            values[option] = 0;
+            html += "<div><span>" + option +"</span><a href='#' class='remove-rule text-danger' data-key='"+ key+"' data-id='"+ did + "'><strong>X</strong></a></div>";
+        }
+        $('#manage-rule').find(".modal-primary").html(html);
+        $('#manage-rule').modal();
+        $('#add-rule').attr("data-key", key);
+        $('#add-rule').attr("data-id", did);
+    });
+
+    $(document.body).on('click', '.btn-expand-all', function(e) {
+        e.preventDefault();
+        $(this).closest(".filtering").find(".toggleable-inner").toggle();
+    });
+    
+
+    $(document.body).on('click','.remove-rule', function(e){
+        e.preventDefault();
+        var productId = $(this).attr('data-id');
+        var p = $(this).parent();
+        var key = $(this).attr('data-key');
+        var value = $(this).attr('data-title');
+        if (key == "manufacturer_s") {
+            var synonym = $(this).parent().find("span").text();
+            $.ajax({
+                url: "/products/" + productId + "/synonym/remove/",
+                type: "post",
+                data: {"synonym": synonym},
+                dataType: "json",
+                error: function(data) {
+                    alert("error");
+                },
+                success: function(data) {
+                    p.remove();
+                }
+            });
+        } else {
+            var synonym = $(this).parent().find('span').text();
+            var data = {"synonym": synonym, "synonym_type": key,};
+            console.log(data);
+            $.ajax({
+                url: "/products/" + productId + "/title/remove/",
+                type: "post",
+                data: {data: JSON.stringify(data)},
+                dataType: "json",
+                error: function(data) {
+                    alert("error");
+                },
+                success: function(data) {
+                    p.remove();
+                }
+            });
+        }
+    });
+    $('#add-rule').click(function(e){
+        e.preventDefault();
+        var t = $(this);
+        t.attr('disabled');
+        var name = $('#rule-value').val();
+        if (name.length == 0) {
+            return;
+        }
+        values[name] = 0;
+        var product_id = $(this).attr('data-id');
+        var key = $(this).attr('data-key');
+
+        var data= {"value": JSON.stringify(values), "key": key};
+        if (key == "manufacturer_s") {
+            var request = $.ajax({
+                url: "/products/" + product_id + "/manufacturer/synonym/add/",
+                type: "post",
+                data: data,
+                dataType: "json",
+                error: function(data) {
+                    alert("error");
+                    $("#second-progress").hide();
+                    $("#first-filter").show();
+                    t.removeAttr('disabled');
+                },
+                success: function(data) {
+                    $('#manage-rule ').find(".modal-primary").append("<div>" + name + "</div>");
+                    t.removeAttr('disabled');
+                    $('#rule-value').val("");
+                }
+            });
+        } else {
+            
+            var request = $.ajax({
+                url: "/products/" + product_id + "/title/modify/",
+                type: "post",
+                data: data,
+                dataType: "json",
+                error: function(data) {
+                    alert("error");
+                    $("#second-progress").hide();
+                    $("#first-filter").show();
+                    t.removeAttr('disabled');
+                },
+                success: function(data) {
+                    $('#manage-rule ').find(".modal-primary").append("<div>" + name + "</div>");
+                    t.removeAttr('disabled');
+                    $('#rule-value').val("");
+                }
+            });
+        }
+    });
+
+    $('.btn-test-alternative').click(function(e){
+        var testButton = $(this);
+        $(this).attr('disabled', 'disabled');
+        e.preventDefault();
+        var k = $(this).closest('.row').find('h5');
+        var title = k.find("strong").text();
+        var manufacturer = k.find('small').text();
+        var data = {"title": title, "manufacturer": manufacturer};
+        var filtering = $(this).closest('.zzz').find(".filtering");
+        filtering.html('<div class="spinner-border" role="status"> <span class="sr-only">Loading...</span> </div>');
+        $.ajax({
+            url: "/products/test/",
+            type: "post",
+            data: data,
+            dataType: "json",
+            error: function(data) {
+                testButton.removeAttr("disabled");
+                alert("error");
+            },
+            success: function(data) {
+                testButton.removeAttr("disabled");
+                filtering.html("");
+                console.log(data);
+                if (data["type"] == "ambiguous") {
+                    var alternatives = data["alternatives"];
+                    Object.keys(alternatives).forEach(function(key) {
+                        console.log(alternatives[key]);
+                        renderNewOptions(alternatives[key], key, filtering, false, false);
+                    });
+                } else {
+                    renderNewOptions(data["result"], data["result"]["product_id"], filtering, true, false);
+                    var alternatives = data["alternatives"];
+                    Object.keys(alternatives).forEach(function(key) {
+                        console.log(alternatives[key]);
+                        renderNewOptions(alternatives[key], key, filtering, true, true);
+                    });
+                    testButton.closest('.zzz').css("background", "#d4edda");
+                    $('<div style="text-align:right;"> <a href="#" class="btn btn-info btn-expand-all"><i class="fa fa-expand"></i> Развернуть все</a> </div>').appendTo(filtering);
+                }
+            }
+        });
+    });
+    
+
+    $('.btn-search-alternative').click(function(e){
+        e.preventDefault();
+        ignore = []
+        $(this).closest('.zzz').find('.toggleable').each(function(){
+            ignore.push($(this).attr('data-id'));
+        });
+        console.log(ignore);
+        var title = $(this).closest('.zzz').find("h5").html();
+        var to_search = $(this).closest('.zzz').find("h5 strong").text();
+        $('#manage-search').find(".modal-title").html(title);
+        $('#manage-search').modal();
+        currentProductBlock = $(this).closest('.zzz').find('.filtering');
+        setTimeout(function(){
+            $('#example_filter input').val(to_search).trigger("keyup");
+            $('#example_filter input').focus();
+        }, 300)
+    });
+
+
+    $('#example').DataTable({
+        responsive: true,
+        serverSide: true,
+        createdRow: function( row, data, dataIndex ) {
+            var d = data[0];
+            $(row).attr('data-id', d);
+            for (var i = 0; i < ignore.length; i++) {
+                console.log(ignore[i] + " " + d+ "");
+                if (ignore[i] + "" == d+ "") {
+                    $(row).addClass("already");
+                }
+            }
+        },
+        ajax: '/products/data.json',
+        "columnDefs": [
+        ]});
+
+    
+    $('#example tbody').on( 'click', 'tr', function () {
+        if($(this).hasClass("already")) {
+            alert("Товар уже добавлен");
+            return;
+        }
+        var key = $(this).attr('data-id');
+        ignore.push(key);
+        var title = $(this).children().eq(1).text();
+        var manufacturer = $(this).children().eq(2).text();
+        addAlternative(key, title, manufacturer);
+    } );
+
+    $(document.body).on('click', '.register-synonym', function(e){
+        e.preventDefault();
+        var f = $(this).attr('data-form');
+        var productId = $(this).attr('data-id');
+        var data =  $('#' + f).serialize();
+
+        var t = $(this);
+        t.attr('disabled', 'disabled');
+        $.ajax({
+            url: "/products/" + productId + "/synonym/create/",
+            type: "post",
+            data: data,
+            dataType: "json",
+            error: function(data) {
+                alert("error");
+                t.removeAttr('disabled');
+            },
+            success: function(data) {
+                console.log(data);
+                t.removeAttr('disabled');
+                $('#' + f).remove();
+                var synonym = data["data"];
+                if (synonym) {
+                    renderNewOptions(data, productId, null, false, false);
+                } else {
+                    renderCreateSynonym(data, productId, null);
+                }
+                $('#manage-search').modal('hide');
+            }
+        });
+
+        console.log(data);
+    });
+
+    function addAlternative(productId, title, manufacturer) {
+        var request = $.ajax({
+            url: "/products/" + productId + "/synonym/",
+            type: "get",
+            dataType: "json",
+            error: function(data) {
+                alert("error");
+                $("#second-progress").hide();
+                $("#first-filter").show();
+            },
+            success: function(data) {
+                console.log(data);
+                var synonym = data["data"];
+                if (synonym) {
+                    renderNewOptions(data, productId, null, false, false);
+                } else {
+                    renderCreateSynonym(data, productId, null, title, manufacturer);
+                }
+                $('#manage-search').modal('hide');
+            }
+        });
+        
+    }
+
+    function renderCreateSynonym(data, productId, container, title, manufacturer) {
+        var html ='<form id="form-'+productId +'"><div class="create-synonym-block p-3">';
+        html += '<h6 class="py-2">' + title +'</h6>';
+        html += '<h6 class="synonym-manufacturer-name">' + manufacturer +'</h6>';
+        html += '<fieldset class="mr-1 mb-2"> <legend>name</legend>';
+        html += '<input type="text" name="name" />';
+        html += '</fieldset>';
+        html +='<fieldset class="mr-1 mb-2"> <legend>manufacturer_s</legend>';
+        html += '<input type="text" id="manufacturer-'+ productId +'" /><input class="hidden-manufacturer" style="width: 60px;" type="text" name="manufacturer" />';
+        html += '<a href="#" data-key="manufacturer_s" class="create-manufacturer btn btn-warning"><i class="fa fa-plus"></i></a>';
+        html += '</fieldset>';
+        html +='<fieldset class="mr-1 mb-2"> <legend>dosage_form</legend><input name="dosage_form" list="dosage_form" /> <datalist id="dosage_form"> ';
+        html += '<option value="спрей"> <option value="таблетки"><option value="капсулы"> <option value="суспензия"><option value="раствор"><option value="порошок"><option value="гель"><option value="крем"><option value="мазь"><option value="суппозиторий"><option value="пастилки"><option value="сироп"><option value="капли"><option value="эмульсия"><option value="линимент">';
+        html += '</datalist></fieldset>';
+        
+        html +='<fieldset class="mr-1 mb-2"> <legend>dosage_size_1</legend>';
+        html += '<input type="text" name="dosage_size_1" />';
+        html += '</fieldset>';
+
+        html +='<fieldset class="mr-1 mb-2"> <legend>dosage_size_1_meas</legend><input name="dosage_size_1_meas" list="dosage_size_1_meas" /> <datalist id="dosage_size_1_meas"> ';
+        html += '<option value="МГ"> <option value="Г"><option value="МКГ"> <option value="%"><option value="АТЕ"><option value="ДТ"><option value="ЕД"><option value="ЛЕ"><option value="МЕ"><option value="МО">';
+        html += '</datalist></fieldset>';
+
+        html +='<fieldset class="mr-1 mb-2"> <legend>volume</legend>';
+        html += '<input type="text" name="volume" />';
+        html += '</fieldset>';
+
+
+        html +='<fieldset class="mr-1 mb-2"> <legend>volume_meas</legend><input name="volume_meas" list="volume_meas" /> <datalist id="volume_meas"> ';
+        html += '<option value="МЛ"> <option value="Л"><option value="Г"> <option value="МГ"><option value="КГ"><option value="ДОЗ">';
+        html += '</datalist></fieldset>';
+
+        html +='<fieldset class="mr-1 mb-2"> <legend>quantity</legend>';
+        html += '<input type="text" name="quantity" />';
+        html += '</fieldset>';
+
+        html +='<fieldset class="mr-1 mb-2"> <legend>marker</legend>';
+        html += '<input type="text" name="marker" />';
+        html += '</fieldset>';
+
+        html +='<fieldset class="mr-1 mb-2"> <legend>marker2</legend>';
+        html += '<input type="text" name="marker2" />';
+        html += '</fieldset><hr>';
+
+        html += '<button class="btn btn-primary register-synonym" data-id="'+ productId + '" data-form="form-'+productId +'">Создать</button></div></form>';
+        if (container) {
+            container.append(html);
+        } else {
+            currentProductBlock.prepend(html);
+        }
+        $('#manufacturer-' + productId).autocomplete({
+            serviceUrl: '/autocomplete/manufacturer/synonyms/',
+            groupBy: 'category',
+            width: 'flex',
+            onSelect: function (suggestion) {
+                $('#manufacturer-' + productId).parent().find('.hidden-manufacturer').val(suggestion.data["id"]);
+            },
+            onInvalidateSelection: function(){
+                $('#manufacturer-' + productId).parent().find('.hidden-manufacturer').val("");
+            }
+        });
+    }
+    
+
+    function renderNewOptions(data, productId, container, inner, hidden) {
+        var synonym;
+        var st;
+        var visbl = "";
+        if (container != null) {
+            synonym = data;
+            st = "btn-warning";
+            visbl = ' style="display:none;" ';
+            if (!hidden && inner) {
+                st = "btn-success";
+            }
+        } else {
+            synonym = data["data"];
+            st = "btn-info";
+        }
+        var html = "";
+        var h2 = "";
+        var t1='';
+        if (inner) {
+            t1 = ' toggleable-inner';
+            var in2= "";
+            if (hidden) {
+                in2 = "mx-4";
+                h2 = " style='display:none' "
+            }
+            html +="<div class='inner-parent " + in2+"'>";
+        }
+        html += '<div data-id="'+ productId+ '" class="toggleable '+ t1+ '" ' + h2 + '> <h6 class="row">';
+        html += '<a href="#" class="btn  '+ st + '  toggle-view mr-3"><i class="fa fa-expand"></i></a>';
+        html += '<div> <a class="pname" target="_blank" href="https://cp.goapteka.uz/products/' + productId + '/view/">' + data["product"]["name"] +'</a>';
+        html += '<div class="mname">' + data["product"]["manufacturer"] + '</div> </div> </h6>';
+        html +='<div ' + visbl + ' class="filtering-item mb-2"> <fieldset class="mr-1 mb-2"> <legend>name</legend> <select>';
+        if (synonym) {
+            Object.keys(synonym["name"]).forEach(function(key) {
+                html += '<option value="name">'+key + '</option>';
+            });
+        }
+        html += '</select><a href="#" data-key="name" data-id="'+ productId + '" class="open-rule btn btn-primary"><i class="fa fa-plus"></i></a></fieldset>';
+        html += '<fieldset class="mr-1 mb-2"> <legend>manufacturer_s</legend> <select>';
+        if(synonym) {
+            Object.keys(synonym["manufacturer_s"]).forEach(function(key) {
+                html += '<option value="name">'+key + '</option>';
+            });
+        }
+        html += '</select> <a href="#" data-key="manufacturer_s" data-id="'+ synonym["manufacturer"] + '" class="open-rule btn btn-warning"><i class="fa fa-plus"></i></a> </fieldset>';
+        html += '<fieldset class="mr-1 mb-2"> <legend>dosage_form</legend> <select>';
+        if(synonym) {
+            Object.keys(synonym["dosage_form"]).forEach(function(key) {
+                html += '<option value="name">'+key + '</option>';
+            });
+        }
+        html += '</select> <a href="#" data-key="dosage_form" data-id="'+ productId + '" class="open-rule btn btn-primary"><i class="fa fa-plus"></i></a> </fieldset>';
+        html += '<fieldset class="mr-1 mb-2"> <legend>dosage_size_1</legend> <select> ';
+        if(synonym) {
+            Object.keys(synonym["dosage_size_1"]).forEach(function(key) {
+                html += '<option value="name">'+key + '</option>';
+            });
+        }
+        html += '</select> <a href="#" data-key="dosage_size_1" data-id="'+ productId + '" class="open-rule btn btn-primary"><i class="fa fa-plus"></i></a> </fieldset>';
+        html += '<fieldset class="mr-1 mb-2"> <legend>volume</legend> <select>';
+        if(synonym) {
+            Object.keys(synonym["volume"]).forEach(function(key) {
+                html += '<option value="name">'+key + '</option>';
+            });
+        }
+        html += '</select> <a href="#" data-key="volume" data-id="'+ productId + '" class="open-rule btn btn-primary"><i class="fa fa-plus"></i></a> </fieldset>';
+        html += '<fieldset class="mr-1 mb-2"> <legend>quantity</legend> <select>';
+        if(synonym) {
+            Object.keys(synonym["quantity"]).forEach(function(key) {
+                html += '<option value="name">'+key + '</option>';
+            });
+        }
+        html += '</select> <a href="#" data-key="quantity" data-id="'+ productId + '" class="open-rule btn btn-primary"><i class="fa fa-plus"></i></a> </fieldset>';
+        html += ' <fieldset class="mr-1 mb-2"> <legend>marker</legend> <select>';
+        if(synonym) {
+            Object.keys(synonym["marker"]).forEach(function(key) {
+                html += '<option value="name">'+key + '</option>';
+            });
+        }
+        html += '</select> <a href="#" data-key="marker" data-id="'+ productId + '" class="open-rule btn btn-primary"><i class="fa fa-plus"></i></a> </fieldset>';
+        html += '<fieldset class="mr-1 mb-2"> <legend>marker2</legend> <select>';
+        if(synonym) {
+            Object.keys(synonym["marker2"]).forEach(function(key) {
+                html += '<option value="name">'+key + '</option>';
+            });
+        }
+        html += '</select> <a href="#" data-key="marker2" data-id="'+ productId + '" class="open-rule btn btn-primary"><i class="fa fa-plus"></i></a> </fieldset>';
+        html += ' </div> </div>';
+        if (inner) {
+            html += '</div>';
+        }
+        if (container) {
+            container.append(html);
+        } else {
+        currentProductBlock.prepend(html);
+        }
+    }
+});
+</script>
+{% end %}

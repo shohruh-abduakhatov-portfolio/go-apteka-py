@@ -1,0 +1,24 @@
+
+
+{
+    "processing": "Подождите...",
+    "search": "",
+    "lengthMenu": "_MENU_",
+    "info": "с _START_ по _END_ из _TOTAL_",
+    "infoEmpty": "с 0 по 0 из 0",
+    "infoFiltered": "(отфильтровано из _MAX_ записей)",
+    "infoPostFix": "",
+    "loadingRecords": "Загрузка записей...",
+    "zeroRecords": "Записи отсутствуют.",
+    "emptyTable": "В таблице отсутствуют данные",
+    "paginate": {
+      "first": "«",
+      "previous": "←",
+      "next": "→",
+      "last": "»"
+    },
+    "aria": {
+      "sortAscending": ": активировать для сортировки столбца по возрастанию",
+      "sortDescending": ": активировать для сортировки столбца по убыванию"
+    }
+  }

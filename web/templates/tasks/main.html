@@ -1,0 +1,69 @@
+{% from web.handlers.BaseHandler import Role %}
+{% extends "base.html" %}
+
+{% block head %}
+
+{% end %}
+{% block content %}
+{% if len(data) > 0 %}
+  {% for key, value in data.items() %}
+    <div class="card bg-light mb-3" style="max-width: 30rem;">
+      <div class="card-header">Поставщик: <a target="_blank" href="/agents/{{ value["supplier_id"] }}/view/">{{ value["seller_name"] }}</a><br/>
+      {% if "filename" in value %}Файл: <a href="{{ value["url"] }}">{{ value["filename"] }}</a> {% end %}</div>
+      <div class="card-body">
+      {% if "info" in value %}
+        {% if value["info"]["ignore_load"] > 0 %}
+          <p class="card-text">Несовпадение названия товаров: <b>{{ value["info"]["ignore_load"] }}</b></p>
+        {% end %}
+        {% if value["info"]["invalid_expiry"] > 0 %}
+          <p class="card-text">Неверный срок годности: <b>{{ value["info"]["invalid_expiry"] }}</b></p>
+        {% end %}
+      {% end %}
+       
+      </div>
+        <div class="card-footer text-muted">
+          <a href="/pricelist/{{ value["token"] }}/export/" class="btn btn-primary"><i class="fa fa-upload"></i> Обработать вручную</a>
+        <a href="{{ value["url"] }}" class="btn btn-secondary ml-4"><i class="fa fa-file-excel-o"></i> Скачать</a>
+        <hr>
+          <button class="btn btn-danger delete-pricelist" data-id="{{ value["token"] }}"><i class="fa fa-remove"></i> Удалить прайс</button>
+       </div>
+    </div>
+  {% end %}
+{% else %}
+  <div class="center-block text-center">
+    <h1>Проблемы отсутствуют</h1>
+    <div style="font-size:14em;font-weight:100" class="text-success">
+      <i class="fa fa-smile-o" aria-hidden="true"></i>
+    </div>
+  </div>
+{% end %}
+{% end %}
+{% block bottom %}
+<script>
+$(document).ready(function(){
+  var token = Cookies.get("_xsrf");
+    $.ajaxSetup({
+    headers: {
+      "X-XSRFToken": token
+    }
+  });
+  $('.delete-pricelist').click(function(e){
+    $(this).attr('disabled', 'disabled');
+    var key = $(this).attr("data-id");
+    e.preventDefault();
+    var request = $.ajax({
+      url: "/export/remove/",
+      type: "post",
+      data: {"key": key},
+      dataType: "json",
+      error: function(data) {
+        alert("error");
+      },
+      success: function(data) {
+        window.location.reload();
+      }
+    });
+  })
+});
+</script>
+{% end %}

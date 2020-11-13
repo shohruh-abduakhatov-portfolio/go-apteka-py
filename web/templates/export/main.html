@@ -1,0 +1,1311 @@
+{% extends "../base.html" %}
+
+{% block head %}
+<style>
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+textarea:focus, select.form-control:focus, input:focus, input[type]:focus, .uneditable-input:focus {   
+    box-shadow: 0 0 0.5rem 0.5rem rgba(0,123,255,.7);
+}
+.switch-light input:focus + span {
+    box-shadow: 0 0 0.5rem 0.5rem rgba(0,123,255,.7);
+}
+.modal-footer {
+    justify-content: space-between;
+}
+</style>
+{% end %}
+{% block body %}
+{% import json %}
+<div id="upload">
+
+    <div class="container">
+    <div class="top-alert">
+    <div class="card" style="width: 18rem;">
+    <div class="alert file-alert alert-dark mb-0 py-0" role="alert">
+        <strong>{{ task["seller_name"] }}</strong><br/>
+        Файл: <strong><i class="fa fa-download pl-2 pr-1 text-primary"></i><a href="{{ task["url"] }}">{{ task["filename"] }}</a></strong>
+        </div>
+    </div>
+    {% if revision["ignore_expiry_count"] > 0%}
+    <div class="card" style="width: 18rem;">
+    <div class="alert alert-danger mb-0" role="alert">
+        <i class="fa fa-warning"></i> Неверный срок годности: <strong>{{ revision["ignore_expiry_count"] }}</strong>
+        </div>
+    </div>
+    {% end %}
+    {% if revision["ignore_load_count"] > 0%}
+    <div class="card" style="width: 18rem;">
+    <div class="alert alert-danger mb-0" role="alert">
+        <i class="fa fa-warning"></i> Нагрузка: <strong>{{ revision["ignore_load_count"] }}</strong>
+    </div>
+    </div>
+    {% end %}
+{% if "manufacturer" in agent %}
+{{ agent["manufacturer"] }}
+{% end %}
+    </div>
+<div id="first-filter" class="row pt-4">
+    <div id="excel-content" class="excel-content col-sm-7">
+        <table class="excel">
+            <thead>
+                {% if data is not None %}
+                <tr>
+                <th></th>
+                    {% for i in range(0, len(data.keys())) %}
+                        <th data-default="{{ chr(i + 97) }}" class="enabled"><div>{{ chr(i + 97) }}</div></th>
+                    {% end %}
+                </tr>
+                {% end %}
+        </thead>
+        <tbody>
+            {% if data is not None %}
+            {% for i in range (0, len(data["0"])) %}
+            {% if i > 200 %}
+                {% break %}
+            {% end %}
+            <tr {% if i in json.loads(revision["ignore"]) %} class="ignore" {% end %}>
+                <td width=60>{{ i}} </td>
+                {% for k in data.keys() %}
+                    <td>{{ data[k][i] }}</td>
+                {% end %}
+            </tr>
+            {% end %}
+            {% end %}
+        </tbody>
+    </table>
+</div>
+<div class="excel-modification text-white col-sm-5 shadow-lg p-3 mb-5 bg-dark rounded">
+    <div class="excel-modification-group">
+        <div class="excel-type justify-content-between hidden">
+            <h4 class="ml-4"><span>начать со строки:</span></h4>
+            <select name="from" id="from-row" class="form-control">
+                {% for one in range(0,100) %}
+                <option value="{{ one }}" {% if int(one) == revision["row_offset"] %} selected {% end %}>{{ one }}</option>
+                {% end %}
+            </select>
+        </div>
+        <!-- hr cl>-->
+        <div class="row m-0">
+            <div class="excel-type d-flex justify-content-between col-sm-6 active-pick">
+                <h6><i class="square prd-active"></i><span>Товар</span>
+                </h6>
+                <select name="from" id="excel-product" tabindex="1" autofocus="autofocus" class="form-control bounded">
+                    <option value="?">?</option>
+                    {% for k, one in enumerate(range(97,150)) %}
+                    <option value="{{ chr(one) }}">{{ chr(one) }}</option>
+                    {% end %}
+                </select>
+            </div>
+            <div class="excel-type d-flex justify-content-between col-sm-6 {% if "manufacturer" in agent %} hidden {% end %}">
+                <h6><i class="square mnf-active"></i><span>Производитель</span>
+                </h6>
+                <select name="manufacturer" tabindex="1" id="excel-manufacturer" class="form-control bounded {% if "manufacturer_id" in agent and agent["manufacturer_id"] != None and agent["manufacturer_id"] > 0 %} hidden{%end%}">
+                    <option value="?">?</option>
+                    {% for k, one in enumerate(range(97,150)) %}
+                    <option value="{{ chr(one) }}">{{ chr(one) }}</option>
+                    {% end %}
+                </select>
+            </div>
+        </div>
+        <hr>
+        <div class="row m-0">
+            <div class="excel-type d-flex justify-content-between col-sm-6">
+                <h6><i class="square exp-active"></i><span>Срок годности</span>
+                </h6>
+                <select name="expiry" tabindex="1" id="excel-expiry" class="form-control bounded">
+                    <option value="?">?</option>
+                    {% for k,one in enumerate(range(97,150)) %}
+                    <option value="{{ chr(one) }}">{{ chr(one) }}</option>
+                    {% end %}
+                </select>
+            </div>
+            <div class="col-sm-6">
+                <div class="excel-type d-flex justify-content-between">
+                    <h6><i class="square prc-base-active"></i><span>Цена (базовая):</span>
+                    </h6>
+                    <select name="price" tabindex="1" id="excel-price-base" class="form-control bounded">
+                        <option value="?">?</option>
+                        {% for k, one in enumerate(range(97,150)) %}
+                        <option value="{{ chr(one) }}">{{ chr(one) }}</option>
+                        {% end %}
+                    </select>
+                </div>
+        </div>
+        </div>
+        <hr>
+        <div class="row m-0">
+            <div class="excel-type d-flex justify-content-between col-sm-6">
+                <h6><i class="square load-active"></i><span>Нагрузка:</span>
+                </h6>
+                <select name="load" tabindex="1" id="excel-load" class="form-control bounded">
+                    <option value="?">?</option>
+                    {% for k,one in enumerate(range(97,150)) %}
+                    <option value="{{ chr(one) }}">{{ chr(one) }}</option>
+                    {% end %}
+                </select>
+            </div>
+            <div class="col-sm-6">
+                <div class="excel-type d-flex justify-content-between">
+                    <h6><i class="square quantity-active"></i><span>Остаток:</span>
+                    </h6>
+                    <select name="quantity" tabindex="1" id="excel-quantity" class="form-control bounded">
+                        <option value="?">?</option>
+                        {% for k, one in enumerate(range(97,150)) %}
+                        <option value="{{ chr(one) }}">{{ chr(one) }}</option>
+                        {% end %}
+                    </select>
+                </div>
+        </div>
+        </div>
+        <hr>
+        <div class="row m-0">
+            <div class="col-sm-6">
+                <div class="excel-type d-flex justify-content-between">
+                    <h6><i class="square prc-active"></i><span>Цена (наличные):</span>
+                    </h6>
+                </div>
+                <div class="d-flex">
+                    <label class="switch-light switch-candy">
+                    <input tabindex="1" type="checkbox" id="price-cash">
+                    <span class="large-4 columns float-left">
+                        <span>Столбец</span> <span>Процент</span> <a></a>
+                    </span>
+                </label>
+                <div id="price-cash-from-excel" class="pick-from-excel">
+                    <select name="price" tabindex="1" id="excel-price" class="form-control bounded">
+                        <option value="?">?</option>
+                        {% for k, one in enumerate(range(97,150)) %}
+                        <option value="{{ chr(one) }}">{{ chr(one) }}</option>
+                        {% end %}
+                    </select>
+                </div>
+                <div id="price-cash-percentage" class="percentage hidden">
+                    <input type="number" tabindex="1" id="price-cash-percentage-input" class="form-control" placeholder="0"><span>%</span>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="excel-type d-flex justify-content-between mt-1">
+                <h6><i class="square prc-active"></i><span>Цена (предоплата 100):</span>
+                </h6>
+
+            </div>
+            <div class="d-flex">
+                <label class="switch-light switch-candy">
+                <input type="checkbox" tabindex="1" id="price-wire100" {% if (int(revision["price_wire100_percent"]) > 0) %} checked {% end %}>
+                <span class="large-4 columns float-left">
+                    <span>Столбец</span> <span>Процент</span> <a></a>
+                </span>
+            </label>
+            <div id="price-wire100-from-excel" class="pick-from-excel {% if (int(revision["price_wire100_percent"]) > 0) %} hidden {% end %}">
+                <select name="price" tabindex="1" id="excel-price-wire100" class="form-control bounded">
+                    <option value="?">?</option>
+                    {% for k, one in enumerate(range(97,150)) %}
+                    <option value="{{ chr(one) }}">{{ chr(one) }}</option>
+                    {% end %}
+                </select>
+            </div>
+            <div id="price-wire100-percentage" class="percentage {% if (int(revision["price_wire100_percent"]) <= 0) %} hidden {% end %}">
+                <input type="number" tabindex="1" id="price-wire100-percentage-input" class="form-control" placeholder="0" {% if int(revision["price_wire100_percent"]) >= -1 %} value="{{ int(revision["price_wire100_percent"]) }}" {% end %} /><span>%</span>
+            </div>
+        </div>
+    </div>
+</div>
+<hr>
+<div class="row m-0">
+
+    <div class="col-sm-6">
+        <!-- wire 75 -->
+        <div class="excel-type d-flex justify-content-between mt-1">
+            <h6><i class="square prc-active"></i><span>Цена (предоплата 75):</span>
+            </h6>
+        </div>
+        <div class="d-flex">
+            <label class="switch-light switch-candy">
+            <input type="checkbox" tabindex="1" id="price-wire75"  {% if int(revision["price_wire75_percent"]) > 0 %} checked {% end %}>
+            <span class="large-4 columns float-left">
+                <span>Столбец</span> <span>Процент</span> <a></a>
+            </span>
+        </label>
+        <div id="price-wire75-from-excel" class="pick-from-excel {% if (int(revision["price_wire75_percent"]) > 0) %} hidden {% end %}">
+            <select name="price" tabindex="1" id="excel-price-wire75" class="form-control bounded">
+                <option value="?">?</option>
+                {% for k, one in enumerate(range(97,150)) %}
+                <option value="{{ chr(one) }}">{{ chr(one) }}</option>
+                {% end %}
+            </select>
+        </div>
+        <div id="price-wire75-percentage" class="percentage {% if int(revision["price_wire75_percent"]) <= 0 %} hidden {% end %}">
+            <input type="number" tabindex="1" id="price-wire75-percentage-input" class="form-control" placeholder="0" {% if int(revision["price_wire75_percent"]) >= -1 %} value="{{ int(revision["price_wire75_percent"]) }}" {% end %}><span>%</span>
+        </div>
+    </div>
+    <!-- wire50 -->
+</div>
+
+<div class="col-sm-6">
+    <div class="excel-type d-flex justify-content-between mt-1">
+        <h6><i class="square prc-active"></i><span>Цена (предоплата 50):</span>
+        </h6>
+    </div>
+    <div class="d-flex">
+        <label class="switch-light switch-candy">
+        <input type="checkbox" tabindex="1" id="price-wire50" {% if int(revision["price_wire50_percent"]) > 0 %} checked {% end %}>
+        <span class="large-4 columns float-left">
+            <span>Столбец</span> <span>Процент</span> <a></a>
+        </span>
+    </label>
+    <div id="price-wire50-from-excel" class="pick-from-excel {% if (int(revision["price_wire50_percent"]) > 0) %} hidden {% end %}">
+        <select name="price" tabindex="1" id="excel-price-wire50" class="form-control bounded">
+            <option value="?">?</option>
+            {% for k, one in enumerate(range(97,150)) %}
+            <option value="{{ chr(one) }}">{{ chr(one) }}</option>
+            {% end %}
+        </select>
+    </div>
+    <div id="price-wire50-percentage" class="percentage {% if int(revision["price_wire50_percent"]) <= 0 %} hidden {% end %}">
+        <input type="number" tabindex="1" id="price-wire50-percentage-input" class="form-control" placeholder="0" {% if int(revision["price_wire50_percent"]) >= -1 %} value="{{ int(revision["price_wire50_percent"]) }}" {% end %}><span>%</span>
+    </div>
+</div>
+</div>
+</div>
+<hr>
+
+<!-- wire25 -->
+<div class="row m-0">
+    <div class="col-sm-6" style="margin: 0 auto;">
+        <h6 class="excel-type d-flex justify-content-between mt-1 col-sm-6">
+            <i class="square prc-active"></i><span>Цена (предоплата 25):</span>
+        </h6>
+        <div class="d-flex">
+            <label class="switch-light switch-candy">
+            <input type="checkbox" tabindex="1" id="price-wire25" {% if int(revision["price_wire25_percent"]) > 0 %} checked {% end %}>
+            <span class="large-4 columns float-left">
+                <span>Столбец</span> <span>Процент</span> <a></a>
+            </span>
+        </label>
+        <div id="price-wire25-from-excel" class="pick-from-excel {% if (int(revision["price_wire25_percent"]) > 0) %} hidden {% end %}">
+            <select name="price" tabindex="1" id="excel-price-wire25" class="form-control bounded">
+                <option value="?">?</option>
+                {% for k, one in enumerate(range(97,150)) %}
+                <option value="{{ chr(one) }}">{{ chr(one) }}</option>
+                {% end %}
+            </select>
+        </div>
+        <div id="price-wire25-percentage" class="percentage {% if int(revision["price_wire25_percent"]) <= 0 %} hidden {% end %}">
+            <input type="number" tabindex="1" id="price-wire25-percentage-input" class="form-control" placeholder="0" {% if int(revision["price_wire25_percent"]) >= -1 %} value="{{ int(revision["price_wire25_percent"]) }}" {% end %}><span>%</span>
+        </div>
+    </div>
+</div>
+</div>
+
+<hr>
+<div class="d-flex">
+    <label style="padding:20px;"><input type="checkbox" id="keep" value="1"><span style="padding-left:8px; font-size:20px;">Не удалять старый прайс</span></label>
+
+    <button type="button" tabindex="1" id="filter-excel" class="btn btn-primary mt-3 ml-auto"><i class="fa fa-filter"></i> Отфильтровать</button>
+</div>
+</div>
+</div>
+</div>
+<div id="second-progress" class="hidden">
+    <h3 class="mt-5">Применяем фильтр...</h3>
+    <div class="spinner">
+        <div class="rect1"></div>
+        <div class="rect2"></div>
+        <div class="rect3"></div>
+        <div class="rect4"></div>
+        <div class="rect5"></div>
+    </div>
+</div>
+<div id="manufacturer-progress" class="hidden">
+    <h3 class="mt-5">Фильтруем с учетом исправления производителей...</h3>
+    <div class="spinner">
+        <div class="rect1"></div>
+        <div class="rect2"></div>
+        <div class="rect3"></div>
+        <div class="rect4"></div>
+        <div class="rect5"></div>
+    </div>
+</div>
+<div id="second-filter" class="pt-4 pb-4">
+    <div id="conflicted-manufacturers-parent">
+        <div class="alert alert-primary" role="alert">
+            <strong><h4>Обнаружены несоответствия производителей:</h4></strong>
+            <hr>
+            <p>Выберите из выпадающего списка верное название производителя и нажмите <strong>"Сохранить альяс"</strong>. Если же это новый производитель - нажмите <strong>"Новый производитель"</strong></p>
+            <hr>
+            <a href="#" id="skip-manufacturer" class="btn btn-primary">Пропустить шаг</a>
+        </div>
+    </div>
+    <div id="conflicted-manufacturers"></div>
+
+    <h2>Необходимы исправления: <span id="excel-filtered-count"></span> </h2>
+    <div id="conflicted">
+
+    </div>
+    <div id="publish-result" class="hidden">
+    <a href="#" id="publish-result-button" class="btn btn-primary">Опубликовать прайс-лист</a>
+    <div class="spinner hidden">
+        <div class="rect1"></div>
+        <div class="rect2"></div>
+        <div class="rect3"></div>
+        <div class="rect4"></div>
+        <div class="rect5"></div>
+    </div>
+    </div>
+    <div id="sucessful-publish" class="hidden">
+        <div class="alert alert-success" role="alert">
+            <h4 class="alert-heading">Прайс лист успешно загружен!</h4>
+            <p><a href="/pricelist/">Перейти к списку задач</a></p>
+        </div>
+    </div>
+</div>
+</div>
+
+<div id="rowModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-body">
+                <div class="" role="alert">
+                    <strong><h4 style="display:flex">
+                    <button type="button" id="ignore-row-editing" class="btn btn-warning  mr-2"><i class="fa fa-minus-circle"></i> Игнорировать</button>
+                    <span style="flex:1; line-height:37px;">Товар требует редактирования:</span>
+                    <button type="button" id="cancel-row-editing" class="btn btn-secondary btn-cancel" data-dismiss="modal"><i class="fa fa-close"></i> Закрыть</button></h4></strong>
+                    <hr>
+                </div>
+                <div class="modal-ajax row"></div>
+            </div>
+            <div class="modal-footer">
+                 
+                <a href="#" class="btn btn-primary product-alias-save"><i class="fa fa-save"></i> Сохранить алиас</a>
+                <a href="#" class="btn btn-danger product-alias-full-register hidden"><i class="fa fa-save"></i> Сохранить привязку товара</a>
+                <button type="button" id="create-new-product" class="btn btn-danger hidden" style="float:left;"><i class="fa fa-plus-circle"></i> Зарегистрировать новый товар</button>
+            </div>
+            <div class="large-loading"></div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+
+<div class="modal fade" id="alertModal" role="dialog">
+    <div class="modal-dialog modal-sm">
+      <div class="modal-content">
+        <div class="modal-header">
+        <h4 class="modal-title">Ошибка</h4>
+          <button type="button" class="close" data-dismiss="modal">&times;</button>
+          
+        </div>
+        <div class="modal-body">
+          <p>Выберите хотя бы одно значение цены</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary" data-dismiss="modal">Закрыть</button>
+        </div>
+      </div>
+    </div>
+  </div>
+{% end %}
+
+{% block bottom %}
+<script src="{{ static_url("js/functions.js") }}"></script>
+<script type="text/javascript">
+    var manufacturers_list;
+    load_all_manufacturers(function(data){
+        manufacturers_list = data;
+    });
+    var agent_id = 10;
+    var name_detection_row = {{ revision["name_column"] }} + 2;
+    var expiry_detection_row = {{ revision["expiry_column"] }} + 2;
+    {% if "manufacturer" in agent %}
+    var manufacturer_detection_row = -2;
+    {% else %}
+    var manufacturer_detection_row = {{ revision["manufacturer_column"] }} + 2;
+    {% end %}
+    var potential_start = {{ revision["row_offset"] }};
+
+    var prd_index = {{ revision["name_column"] }} + 2;
+     {% if "manufacturer" in agent %}
+    var mnf_index = -2;
+    {% else %}
+    var mnf_index = {{ revision["manufacturer_column"] }} + 2;
+    {% end %}
+    var load_index = 0;
+    {% if "load_column" in revision %} load_index = {{ revision["load_column"] }} + 2; {% end %}
+    var quantity_index = 0;
+    {% if "quantity_column" in revision %} quantity_index = {{ revision["quantity_column"] }} + 2; {% end %}
+    var prc_index = 0;
+    {% if revision["price_cash_column"] > 0 %} prc_index = {{ revision["price_cash_column"] }} + 2 {% end %};
+    var prc_base_index = 0;
+    {% if revision["price_base_column"] > 0 %} prc_base_index = {{ revision["price_base_column"] }} + 2 {% end %};
+    var prc_wire100_index = 0;
+    {% if revision["price_wire100_column"] > 0 %} prc_wire100_index = {{ revision["price_wire100_column"] }} + 2 {% end %};
+    var prc_wire75_index = 0;
+    {% if revision["price_wire75_column"] > 0 %} prc_wire75_index = {{ revision["price_wire75_column"] }} + 2 {% end %};
+    var prc_wire50_index = 0;
+    {% if revision["price_wire50_column"] > 0 %} prc_wire50_index = {{ revision["price_wire50_column"] }} + 2 {% end %};
+    var prc_wire25_index = 0;
+    {% if revision["price_wire25_column"] > 0 %} prc_wire25_index = {{ revision["price_wire25_column"] }} + 2 {% end %};
+    
+    
+    var prc_wire100_percent = {{ revision["price_wire100_percent"] }};
+    var prc_wire75_percent = {{ revision["price_wire75_percent"] }};
+    var prc_wire50_percent = {{ revision["price_wire50_percent"] }};
+    var prc_wire25_percent = {{ revision["price_wire25_percent"] }};
+    var exp_index = {{ revision["expiry_column"] }} + 2;
+    var row = {{ revision["row_offset"] }};
+    var disabled = {};
+
+    var ignore =  [ {% for i in json.loads(revision["ignore"]) %} {{ i }}, {% end %} ];
+</script>
+<script>
+    var ffff = {% if "manufacturer_id" in agent and agent["manufacturer_id"] != None and agent["manufacturer_id"] > 0%} true {% else%} false {% end %};
+    var key = undefined;
+    {% if key is not None %}
+    key = {{ key }};
+    {% end %}
+    $(document).ready(function() {
+        if(name_detection_row > 0) {
+            prd_index = name_detection_row;
+        }
+        if(expiry_detection_row > 0) {
+            exp_index = expiry_detection_row;
+        }
+
+        if(manufacturer_detection_row > 0) {
+            mnf_index = manufacturer_detection_row;
+        }
+        if(potential_start > 0) {
+            row = potential_start;
+        }
+
+    $('#price-cash').change(function(data){
+        var from_excel = $('#price-cash-from-excel');
+        var percentage = $('#price-cash-percentage');
+        if (!$(this)[0].checked) {
+            from_excel.show();
+            percentage.hide();
+        } else {
+            prc_index = -1;
+            $('#excel-price').val("?").trigger("change");
+            from_excel.hide();
+            percentage.show();
+        }
+    });
+
+    $('#price-wire100').change(function(data){
+        var from_excel = $('#price-wire100-from-excel');
+        var percentage = $('#price-wire100-percentage');
+        if (!$(this)[0].checked) {
+            from_excel.show();
+            percentage.hide();
+        } else {
+            prc_wire100_index = -1;
+            $('#excel-price-wire100').val("?").trigger("change");
+            from_excel.hide();
+            percentage.show();
+        }
+    });
+
+    $('#price-wire75').change(function(data){
+        var from_excel = $('#price-wire75-from-excel');
+        var percentage = $('#price-wire75-percentage');
+        if (!$(this)[0].checked) {
+            from_excel.show();
+            percentage.hide();
+        } else {
+            $('#excel-price-wire75').val("?").trigger("change");
+            from_excel.hide();
+            percentage.show();
+        }
+    });
+
+    $('#price-wire50').change(function(data){
+        var from_excel = $('#price-wire50-from-excel');
+        var percentage = $('#price-wire50-percentage');
+        if (!$(this)[0].checked) {
+            from_excel.show();
+            percentage.hide();
+        } else {
+            prc_wire50_index = -1;
+            $('#excel-price-wire50').val("?").trigger("change");
+            from_excel.hide();
+            percentage.show();
+        }
+    });
+
+    $('#price-wire25').change(function(data){
+        var from_excel = $('#price-wire25-from-excel');
+        var percentage = $('#price-wire25-percentage');
+        if (!$(this)[0].checked) {
+            from_excel.show();
+            percentage.hide();
+        } else {
+            prc_wire25_index = -1;
+            $('#excel-price-wire25').val("?").trigger("change");
+            from_excel.hide();
+            percentage.show();
+        }
+    });
+    var token = Cookies.get('_xsrf');
+    $.ajaxSetup({
+        headers: {
+        'X-XSRFToken' : token
+    }
+});
+
+});
+    function set_th_for_table(index, cl, text) {
+        if (cl == 'exl-mnf-active' && ffff) {
+            return;
+        }
+        var t = $('#excel-content table').find('th.'+cl);
+        t.text(t.attr('data-default'));
+        t.removeClass(cl);
+        t.addClass('enabled');
+        if(index > 0) {
+            $('#excel-content table').find('th').eq(index - 1)
+            .addClass(cl)
+            .removeClass('enabled')
+            .text(text);
+        }
+    }
+    $(document).ready(function() {
+        $('#excel-product').change(function() {
+            filter_disabled($(this));
+            prd_index = $("#excel-product option:selected").index() + 1;
+
+            set_th_for_table(prd_index, "exl-prd-active", "Товар");
+            $('td.exl-prd-active').removeClass('exl-prd-active');
+            $('#excel-content table td')
+            .filter(":nth-child(" + (prd_index) + ")")
+            .each(function(i){
+                if ($(this).parent().index() >= row) {
+                    $(this).addClass("exl-prd-active");
+                }
+            });
+        });
+        $('#excel-manufacturer').change(function() {
+            filter_disabled($(this));
+            mnf_index = $("#excel-manufacturer option:selected").index() + 1;
+
+            set_th_for_table(mnf_index, "exl-mnf-active", "Производитель");
+            $('td.exl-mnf-active').removeClass('exl-mnf-active');
+            $('#excel-content table td')
+            .filter(":nth-child(" + (mnf_index) + ")")
+            .each(function(i){
+                if ($(this).parent().index() >= row) {
+                    $(this).addClass("exl-mnf-active");
+                }
+            });
+        });
+
+        $('#excel-quantity').change(function() {
+            filter_disabled($(this));
+            quantity_index = $("#excel-quantity option:selected").index() + 1;
+
+            set_th_for_table(quantity_index, "quantity-active", "Остаток");
+            $('td.quantity-active').removeClass('quantity-active');
+            $('#excel-content table td')
+            .filter(":nth-child(" + (quantity_index) + ")")
+            .each(function(i){
+                if ($(this).parent().index() >= row) {
+                    $(this).addClass("quantity-active");
+                }
+            });
+        });
+
+        $('#excel-load').change(function() {
+            filter_disabled($(this));
+            load_index = $("#excel-load option:selected").index() + 1;
+
+            set_th_for_table(load_index, "load-active", "Нагрузка");
+            $('td.load-active').removeClass('load-active');
+            $('#excel-content table td')
+            .filter(":nth-child(" + (load_index) + ")")
+            .each(function(i){
+                if ($(this).parent().index() >= row) {
+                    $(this).addClass("load-active");
+                }
+            });
+        });
+
+        $('#excel-price').change(function() {
+            filter_disabled($(this));
+            prc_index = $("#excel-price option:selected").index() + 1;
+            set_th_for_table(prc_index, "exl-prc-active", "Цена (наличные)");
+            $('td.exl-prc-active').removeClass('exl-prc-active');
+            $('#excel-content table td, th')
+            .filter(":nth-child(" + (prc_index) + ")")
+            .each(function(i){
+                if ($(this).parent().index() >= row) {
+                    $(this).addClass("exl-prc-active");
+                }
+            });
+        });
+
+        $('#excel-price-wire100').change(function() {
+            filter_disabled($(this));
+            prc_wire100_index = $("#excel-price-wire100 option:selected").index() + 1;
+            set_th_for_table(prc_wire100_index, "exl-prc-wire100-active", "Цена (предоплата 100)");
+            $('td.exl-prc-wire100-active').removeClass('exl-prc-wire100-active');
+            $('#excel-content table td, th')
+            .filter(":nth-child(" + (prc_wire100_index) + ")")
+            .each(function(i){
+                if ($(this).parent().index() >= row) {
+                    $(this).addClass("exl-prc-wire100-active");
+                }
+            });
+        });
+
+        $('#excel-price-wire75').change(function() {
+            filter_disabled($(this));
+            prc_wire75_index = $("#excel-price-wire75 option:selected").index() + 1;
+            set_th_for_table(prc_wire75_index, "exl-prc-wire75-active", "Цена (предоплата 75)");
+            $('td.exl-prc-wire75-active').removeClass('exl-prc-wire75-active');
+            if (prc_wire75_index > 0) {
+                $('#excel-content table td, th')
+                .filter(":nth-child(" + (prc_wire75_index) + ")")
+                .each(function(i){
+                    if ($(this).parent().index() >= row) {
+                        $(this).addClass("exl-prc-wire75-active");
+                    }
+                });
+            }
+        });
+
+        $('#excel-price-wire50').change(function() {
+            filter_disabled($(this));
+            prc_wire50_index = $("#excel-price-wire50 option:selected").index() + 1;
+            set_th_for_table(prc_wire50_index, "exl-prc-wire50-active", "Цена (предоплата 50)");
+            $('td.exl-prc-wire50-active').removeClass('exl-prc-wire50-active');
+            $('#excel-content table td, th')
+            .filter(":nth-child(" + (prc_wire50_index) + ")")
+            .each(function(i){
+                if ($(this).parent().index() >= row) {
+                    $(this).addClass("exl-prc-wire50-active");
+                }
+            });
+        });
+
+        $('#excel-price-wire25').change(function() {
+            filter_disabled($(this));
+            prc_wire25_index = $("#excel-price-wire25 option:selected").index() + 1;
+            set_th_for_table(prc_wire25_index, "exl-prc-wire25-active", "Цена (предоплата 25)");
+            $('td.exl-prc-wire25-active').removeClass('exl-prc-wire25-active');
+            $('#excel-content table td, th')
+            .filter(":nth-child(" + (prc_wire25_index) + ")")
+            .each(function(i){
+                if ($(this).parent().index() >= row) {
+                    $(this).addClass("exl-prc-wire25-active");
+                }
+            });
+        });
+        
+        $('#excel-price-base').change(function(data){
+            filter_disabled($(this));
+            prc_base_index = $("#excel-price-base option:selected").index() + 1;
+            set_th_for_table(prc_base_index, "prc-base-active", "Цена (базовая)");
+            $('td.prc-base-active').removeClass('prc-base-active');
+            $('#excel-content table td, th')
+            .filter(":nth-child(" + (prc_base_index) + ")")
+            .each(function(i){
+                if ($(this).parent().index() >= row) {
+                    $(this).addClass("prc-base-active");
+                }
+            });
+        });
+        $('#excel-expiry').change(function() {
+            filter_disabled($(this));
+            exp_index = $("#excel-expiry option:selected").index() + 1;
+            set_th_for_table(exp_index, "exl-exp-active", "Срок годности");
+            $('.exl-exp-active').removeClass('exl-exp-active');
+            $('#excel-content table td, th')
+            .filter(":nth-child(" + (exp_index) + ")")
+            .each(function(i){
+                if ($(this).parent().index() >= row) {
+                    $(this).addClass("exl-exp-active");
+                }
+            });
+        });
+        $('#from-row').change(function() {
+            row = $(this).val();
+            var rowpos = $('#excel-content table tr').eq(row).position();
+            $('#excel-content').animate({scrollTop: rowpos.top}, 600);
+            set_th_for_table(prd_index, "exl-prd-active", "Название");
+            $('#excel-content table td')
+            .filter(":nth-child(" + (prd_index) + ")").each(function(){
+                if($(this).parent().index() >= row) {
+                    $(this).addClass("exl-prd-active");
+                } else {
+                    $(this).removeClass("exl-prd-active");
+                }
+            });
+
+            $('#excel-content table td')
+            .filter(":nth-child(" + (mnf_index) + ")").each(function(){
+                if($(this).parent().index() >= row) {
+                    $(this).addClass("exl-mnf-active");
+                } else {
+                    $(this).removeClass("exl-mnf-active");
+                }
+            });
+            set_th_for_table(mnf_index, "exl-mnf-active", "Производитель");
+
+            $('#excel-content table td, th')
+            .filter(":nth-child(" + (prc_index) + ")").each(function(){
+                if($(this).parent().index() >= row) {
+                    $(this).addClass("exl-prc-active");
+                } else {
+                    $(this).removeClass("exl-prc-active");
+                }
+            });
+            set_th_for_table(prc_index, "exl-prc-active", "Цена (наличные)");
+
+            if (prc_wire100_index > 0) {
+                $('#excel-content table td, th')
+                .filter(":nth-child(" + (prc_wire100_index) + ")").each(function(){
+                    if($(this).parent().index() >= row) {
+                        $(this).addClass("exl-prc-wire100-active");
+                    } else {
+                        $(this).removeClass("exl-prc-wire100-active");
+                    }
+                });
+                set_th_for_table(prc_wire100_index, "exl-prc-wire100-active", "Цена (перечисление 100)");
+            }
+
+            if(prc_wire75_index > 0) {
+                $('#excel-content table td, th')
+                .filter(":nth-child(" + (prc_wire75_index) + ")").each(function(){
+                    if($(this).parent().index() >= row) {
+                        $(this).addClass("exl-prc-wire75-active");
+                    } else {
+                        $(this).removeClass("exl-prc-wire75-active");
+                    }
+                });
+                set_th_for_table(prc_wire75_index, "exl-prc-wire75-active", "Цена (перечисление 75)");
+            }
+
+            if (prc_wire50_index > 0) {
+                $('#excel-content table td, th')
+                .filter(":nth-child(" + (prc_wire50_index) + ")").each(function(){
+                    if($(this).parent().index() >= row) {
+                        $(this).addClass("exl-prc-wire50-active");
+                    } else {
+                        $(this).removeClass("exl-prc-wire50-active");
+                    }
+                });
+                set_th_for_table(prc_wire50_index, "exl-prc-wire50-active", "Цена (перечисление 50)");
+            }
+
+            if(prc_wire25_index > 0) {
+                $('#excel-content table td, th')
+                .filter(":nth-child(" + (prc_wire25_index) + ")").each(function(){
+                    if($(this).parent().index() >= row) {
+                        $(this).addClass("exl-prc-wire25-active");
+                    } else {
+                        $(this).removeClass("exl-prc-wire25-active");
+                    }
+                });
+                set_th_for_table(prc_wire25_index, "exl-prc-wire25-active", "Цена (перечисление 25)");
+            }
+
+            if(prc_base_index > 0) {
+                $('#excel-content table td, th')
+                    .filter(":nth-child(" + (prc_base_index) + ")").each(function(){
+                    if($(this).parent().index() >= row) {
+                        $(this).addClass("prc-base-active");
+                    } else {
+                        $(this).removeClass("prc-base-active");
+                    }
+                });
+                set_th_for_table(prc_base_index, "prc-base-active", "Цена (базовая)");
+            }
+
+            if(load_index > 0) {
+                $('#excel-content table td, th')
+                    .filter(":nth-child(" + (load_index) + ")").each(function(){
+                    if($(this).parent().index() >= row) {
+                        $(this).addClass("load-active");
+                    } else {
+                        $(this).removeClass("load-active");
+                    }
+                });
+                set_th_for_table(load_index, "load-active", "Нагрузка");
+            }
+
+            if(quantity_index > 0) {
+                $('#excel-content table td, th')
+                    .filter(":nth-child(" + (quantity_index) + ")").each(function(){
+                    if($(this).parent().index() >= row) {
+                        $(this).addClass("quantity-active");
+                    } else {
+                        $(this).removeClass("quantity-active");
+                    }
+                });
+                set_th_for_table(quantity_index, "quantity-active", "Остаток");
+            }
+
+            $('#excel-content table td, th')
+            .filter(":nth-child(" + (exp_index) + ")").each(function(){
+                if($(this).parent().index() >= row) {
+                    $(this).addClass("exl-exp-active");
+                } else {
+                    $(this).removeClass("exl-exp-active");
+                }
+            });
+            set_th_for_table(exp_index, "exl-exp-active", "Срок годности");
+        });
+        $('#complete-row-editing').click(function(){
+            $('#complete-row-editing').hide();
+            var trs = $('#result_table tbody tr');
+            if(trs.length > 0) {
+                trs.eq(0).trigger('click');
+            } else {
+                $('#rowModal').modal('hide');
+            }
+        });
+        $('body').delegate('.product-alias-full-register', 'click', function(e){
+            e.preventDefault();
+            var ajax = $(".row-product-name").closest('.modal-content').find('.modal-ajax');
+            var t = $(this);
+            var product_id = $('.product-autocomplete').attr("data-id");
+            var alias_manufacturer = $('.row-manufacturer-name').text();
+            var alias_product = $('.row-product-name').text();
+            var request = $.ajax({
+                url: "/aliases/full/add/",
+                type: "post",
+                data: {"product_id": product_id,
+                "alias_manufacturer":alias_manufacturer,"alias_product": alias_product},
+                dataType: "json",
+                error: function (data) {
+                    alert("error");
+                    $('#second-progress').hide();
+                    $('#first-filter').show();
+                },
+                success: function (data) {
+                    ajax.attr("product", "true");
+                    ajax.attr("manufacturer", "true");
+                    checkForComplete(t);
+                }
+            });
+        });
+        $('body').delegate('.second-filter-result tbody tr', 'click', function(){
+            $('#origin-name').html("");
+            $('.product-alias-full-register').hide();
+            $('#create-new-product').hide();
+            $('#row-modal-loading').show();
+            $('#cancel-row-editing').show();
+            $('#complete-row-editing').hide();
+            $('#hide-row-editing').hide();
+            var b = $('#rowModal').find('.modal-ajax');
+            $('.large-loading').hide();
+            $('#rowModal').modal({backdrop: 'static', keyboard: false });
+            var origin = $(this).html();
+            
+            b.attr("row-id",$(this).attr('data-id'));
+            b.attr('data-row', $(this).attr('data-row'));
+            var product = $(this).children().eq(0).find('.value').html();
+            var wrong_product = $(this).data("wrong-product");
+            var manufacturer = $(this).children().eq(1).find('.value').html();
+            var wrong_manufacturer = $(this).data("wrong-manufacturer");
+            var manufacturerId = $(this).data("manufacturer-id");
+            if (manufacturerId !== undefined) {
+            b.attr("manufacturer-id", manufacturerId);
+            } else { b.removeAttr("manufacturer-id");
+            }
+            var potential_manufacturer = $(this).data("potential-manufacturer");
+            var price = $(this).children().eq(2).find('.value').html();
+            var expiry = $(this).children().eq(3).find('.value').html();
+
+            var html = "";
+            html+= '<div class="col-xs-6 ml-4 mr-4" style="max-width:34vw"><h3 class="card-text"><span>Товар:</span></h3>';
+            html += '<p class="medium row-product-name">'+ product + '</p>';
+            if(wrong_product) {
+                html += '<div id="name-modal-loading" class="modal-loading"> <div class="spinner"> <div class="rect1"></div> <div class="rect2"></div> <div class="rect3"></div> <div class="rect4"></div> <div class="rect5"></div> </div></div>';
+            }
+            b.attr('product', !wrong_product+"");
+            html+= '<div id="name-origin-name"></div></div>';
+            html+= '<div class="col-xs-6 manufacturer-block ml-4 mr-4" style="max-width:28vw"><h3 class="card-text"><span>Производитель:</span></h3>';
+            html += '<p class="medium row-manufacturer-name">';
+            if (manufacturerId !== undefined){
+                html += "<a target='_blank' href='/products/manufacturers/" +manufacturerId + "/view/'>" + manufacturer + "</a>";
+            } else {
+                html += manufacturer;
+            }
+            html += '</p>';
+            if(wrong_manufacturer) {
+                html += '<div id="manufacturer-modal-loading" class="modal-loading"> <div class="spinner"> <div class="rect1"></div> <div class="rect2"></div> <div class="rect3"></div> <div class="rect4"></div> <div class="rect5"></div></div> </div><p>Возможно имелось ввиду:</p>';
+            }
+            b.attr('manufacturer', !wrong_manufacturer+"");
+            html+= '<div id="manufacturer-origin-name" class="text-success"></div>';
+            if(wrong_manufacturer) {
+                 html += '<div class="loading"></div><div class="buttons mt-3"><a href="#" class="btn btn-primary manufacturer-alias-save2">Сохранить алиас</a></div>';
+            }
+            html+='</div>';
+            html+= '<div class="col-xs-6 ml-4 mr-4" style="max-width:28vw"><h3 class="card-text"><span>Цена:</span></h3>';
+            html += '<p class="medium"><span>Наличные:</span> '+ price + '</p>'; 
+            if (price == null) {
+                b.attr('price', false);
+                html += '<p><i class="fa fa-exclamation-circle"></i> Неверное значение цены</p>';
+            }
+
+            html += '<p class="medium">'+ expiry + '</p>';
+            if(expiry == null) {
+                b.attr('expiry', false);
+                html += '<p><i class="fa fa-exclamation-circle"></i> Неверный формат даты</p>';
+            }
+            html += '</div>';
+
+            b.html(html);
+            var product_request = undefined;
+            if (wrong_product) {
+                data = {};
+                if (!wrong_manufacturer) {
+                    data["manufacturer_id"] = manufacturerId;
+                }
+                product_request = $.ajax({
+                    url: "/product/suggest/" + encodeURI(product),
+                    data: data,
+                    type: "get",
+                    dataType: "json",
+                    success: function(data) {
+                        $('#name-modal-loading').hide();
+                        var html = '';
+                        if (data.length > 0) {
+                            html += '<p>Возможно имелось ввиду:</p><select id="product-suggestion" class="form-control">';
+                            var manufacturer = '';
+                            for (var i = 0; i < data.length; i ++) {
+                                var current_manufacturer = data[i]["manufacturer"];
+                                if (manufacturer != current_manufacturer) {
+                                    if (manufacturer != '') {
+                                        html += '</optgroup>';
+                                    }
+                                    html += '<optgroup label="' + current_manufacturer + '">';
+                                    manufacturer = current_manufacturer;
+                                }
+                                html += '<option value="'+data[i]["product_id"]+'">' + data[i]["name"] + '</option>';
+                            }
+                            html += '</select><input type="text" class="product-autocomplete form-control"/>';
+                            html += '<div class="loading"></div><div class="buttons mt-3"><a href="#" class="btn btn-primary product-full-alias ml-4"><i class="fa fa-search"></i> Найти вручную</a><a href="#" class="btn btn-primary product-filtered-alias ml-4 hidden">Рекомендованные товары</a></div>';
+                        } else {
+                            html += '<i class="fa fa-exclamation-circle positive"></i> Новый товар !';
+                        }
+
+                        $('#name-origin-name').html(html);
+                        $('#product-suggestion').trigger('change');
+                    }, error: function(data){
+                        $('#name-origin-name').html("<p class='error'>Ошибка получения данных</p>");
+                        $('#name-modal-loading').hide();
+                    },
+                });
+            }
+            if(wrong_manufacturer) {
+                $('#manufacturer-modal-loading').hide();
+                if (manufacturers_list) {
+                    draw_manufacturers(manufacturers_list, $('#manufacturer-origin-name'));
+                    if (potential_manufacturer) {
+                    $('.manual-manufacturer-select').val(potential_manufacturer.toLowerCase()).trigger('change');
+                    $('.manual-value').val(manufacturers_list[potential_manufacturer.toLowerCase()]);
+                    }
+                } else {
+
+                load_all_manufacturers(function(data){
+                    manufacturers_list = data;
+                    draw_manufacturers(manufacturers_list, $('#manufacturer-origin-name'));
+                    if (potential_manufacturer) {
+                    $('.manual-manufacturer-select').val(potential_manufacturer.toLowerCase()).trigger('change');
+                    $('.manual-value').val(manufacturers_list[potential_manufacturer.toLowerCase()]);
+                    }
+                });
+                }
+            }
+                
+            $.when(
+                product_request
+            )
+            .done(function(first_call, second_call){
+                $('#create-new-product').show();
+                $('.product-alias-save').show();
+            })
+            .fail(function() {
+                alert('error');
+            });
+        });
+$('body').delegate('#ignore-row-editing', 'click', function(e){
+    e.preventDefault();
+    var loading = $('#rowModal .modal-content').find('.large-loading');
+    loading.show();
+    loading.html('<div class="spinner"> <div class="rect1"></div> <div class="rect2"></div> <div class="rect3"></div> <div class="rect4"></div> <div class="rect5"></div> </div>');
+    var ajax = $(".row-product-name").closest('.modal-content').find('.modal-ajax');
+    var t =$(this);
+    var row = ajax.attr("data-row"); 
+     var request = $.ajax({
+        url: "/pricelist/{{ key }}/ignore_row/",
+        type: "post",
+        data: {row: row},
+        dataType: "json",
+        error: function (data) {
+            alert("error");
+            $('#second-progress').hide();
+            $('#first-filter').show();
+        },
+        success: function (data) {
+
+            ajax.attr("product", "true");
+            ajax.attr("manufacturer", "true");
+            checkForComplete(t);
+            loading.remove();
+        }
+    });
+});
+$('body').delegate('#create-new-product', 'click', function(e){
+    e.preventDefault();
+    
+    var loading = $('#rowModal .modal-content').find('.large-loading');
+    loading.show();
+    loading.html('<div class="spinner"> <div class="rect1"></div> <div class="rect2"></div> <div class="rect3"></div> <div class="rect4"></div> <div class="rect5"></div> </div>');
+    var t = $(this);
+    var name = $(".row-product-name").text();
+    var ajax = $(".row-product-name").closest('.modal-content').find('.modal-ajax');
+    var manufacturer = $(".row-manufacturer-name").text();
+    var problem = $(this).closest('#rowModal').find('.modal-ajax').attr('manufacturer');
+    var manual = $('.manual-manufacturer-select').val();
+    var refresh = true;
+    if (manual && !problem) {
+        manufacturer = manual;
+        refresh = false;
+    } 
+    var manufacturerId = $(this).closest('#rowModal').find('.modal-ajax').attr('manufacturer-id');
+    var request = $.ajax({
+        url: "/product/create/",
+        type: "post",
+        data: {name: name, manufacturer: manufacturer, 'manufacturer_id': manufacturerId},
+        dataType: "json",
+        error: function (data) {
+            alert("error");
+            $('#second-progress').hide();
+            $('#first-filter').show();
+        },
+        success: function (data) {
+            ajax.attr("product", "true");
+            ajax.attr("manufacturer", "true");
+            checkForComplete(t);
+            if (refresh) {
+                manufacturers_list = undefined;
+            }
+        }
+    });
+});
+$('body').delegate('.product-filtered-alias', 'click', function(e) {
+    e.preventDefault();
+    $(this).hide();
+    $('.product-full-alias').show();
+    $('#create-new-product').show();
+    $('.product-alias-full-register').hide();
+    $('#manufacturer-origin-name').text("");
+    $('#manufacturer-origin-name').removeAttr("data-id");
+});
+$('body').delegate('.product-full-alias', 'click', function(e) {
+    e.preventDefault();
+    $(this).hide();
+    $('#create-new-product').hide();
+    $('.product-filtered-alias').show();
+    var manualControl = $(this).parent().parent().find('.product-autocomplete');
+    var filteredControl = $('#product-suggestion');
+    manualControl.show();
+    filteredControl.hide();
+    manualControl.val($('.row-product-name').text());
+    manualControl.focus();
+    
+    $(this).parent().parent().find('.product-autocomplete').autocomplete({
+        serviceUrl: '/product/autocomplete/query/',
+        groupBy: 'manufacturer',
+        width: 'flex',
+        onSelect: function (suggestion) {
+           $('.product-alias-full-register').show();
+           $('.product-autocomplete').attr('data-id', suggestion.data["id"]);
+           $('#manufacturer-origin-name').text(suggestion.data["manufacturer"]);
+           $('#manufacturer-origin-name').attr("data-id", suggestion.data["manufacturer_id"]);
+        }
+    });
+});
+$('body').delegate('.product-alias-save', 'click', function(e) {
+    e.preventDefault();
+    var mid = $('#product-suggestion').val();
+    var alias = $('.row-product-name').text();
+    var loading = $('#name-origin-name').find('.loading');
+    loading.show();
+    loading.html('<div class="spinner"> <div class="rect1"></div> <div class="rect2"></div> <div class="rect3"></div> <div class="rect4"></div> <div class="rect5"></div> </div>');
+    var t = $(this);
+    t.hide();
+    add_product_alias(10, mid, alias, function(data) {
+        t.closest('.modal-dialog').find('.modal-ajax').attr('product', true);
+        checkForComplete(t);
+        loading.remove();
+    });
+});
+
+function isInt(value) {
+    var er = /^-?[0-9]+$/;
+    return er.test(value);
+}
+
+$('body').delegate('.manufacturer-alias-save', 'click', function(e){
+    e.preventDefault();
+    var mid = $(this).closest('.manufacturer-block').find('select').val();
+    var mid2 = $(this).closest('.manufacturer-block').find('.manual-value').val();
+    if (mid2) {
+        mid = mid2;
+    }
+    if (!isInt(mid)) {
+        return;
+    }
+    var alias = $(this).closest('.card').find('.card-text').text();
+    $(this).closest('.card').find('.loading').show();
+    $(this).closest('.card').find('.loading').html('<div class="spinner"> <div class="rect1"></div> <div class="rect2"></div> <div class="rect3"></div> <div class="rect4"></div> <div class="rect5"></div> </div>');
+
+    var t = $(this);
+    add_manufacturer_alias(10, mid, alias, function(data) {
+        t.closest('.card').remove();
+        checkForLast();
+    });
+});
+$('body').delegate('.manufacturer-alias-save2', 'click', function(e){
+    e.preventDefault();
+    var mid = $(this).closest('.manufacturer-block').find('select').val();
+    var mid2 = $(this).closest('.manufacturer-block').find('.manual-value').val();
+    if (mid2) {
+        mid = mid2;
+    }
+    var alias = $(this).closest('.manufacturer-block').find('.row-manufacturer-name').text();
+    $(this).closest('.manufacturer-block').find('.loading').show();
+    $(this).closest('.manufacturer-block').find('.loading').html('<div class="spinner"> <div class="rect1"></div> <div class="rect2"></div> <div class="rect3"></div> <div class="rect4"></div> <div class="rect5"></div> </div>');
+    var loading = $(this).closest('.col-xs-6').find('.loading');
+    loading.show();
+    loading.html('<div class="spinner"> <div class="rect1"></div> <div class="rect2"></div> <div class="rect3"></div> <div class="rect4"></div> <div class="rect5"></div> </div>');
+    
+    var t = $(this);
+    t.hide();
+    add_manufacturer_alias(10, mid, alias, function(data) {
+        t.closest('.modal-ajax').attr('manufacturer', true);
+        checkForComplete(t);
+        t.remove();
+        loading.remove();
+    });
+});
+$('body').delegate('.manufacturer-alias-ignore', 'click', function(e){
+    e.preventDefault();
+    $(this).closest('.card').remove();
+    checkForLast();
+});
+$('#filter-excel').click(function(){
+    if(prc_index <= 0 && (prc_wire100_index <= 0 && prc_wire100_percent < 0)) {
+        $('#alertModal').modal({backdrop: 'static'});
+        return;
+    }
+    $('#second-progress').show();
+    $('#second-filter').hide();
+    $('#first-filter').hide();
+    var keep = $('#keep')[0].checked ? 1 : 0;
+    
+    process(function(data) {
+        parse_filtered_data(data);
+    }, keep);
+});
+
+    $('#excel-product').val($('#excel-product').find('option').eq(prd_index - 1).text()).trigger("change");
+    $('#excel-manufacturer').val($('#excel-manufacturer').find('option').eq(mnf_index - 1).text()).trigger("change");
+    $('#excel-expiry').val($('#excel-expiry').find('option').eq(exp_index - 1).text()).trigger("change");
+    if(prc_index > 0) {
+        $('#excel-price').val($('#excel-price').find('option').eq(prc_index - 1).text()).trigger("change");
+    }
+    if(prc_wire100_index > 0) {
+        $('#excel-price-wire100').val($('#excel-price-wire100').find('option').eq(prc_wire100_index - 1).text()).trigger("change");
+    }
+    if(prc_wire75_index > 0) {
+        $('#excel-price-wire75').val($('#excel-price-wire75').find('option').eq(prc_wire75_index - 1).text()).trigger("change");
+    }
+    if(prc_wire50_index > 0) {
+        $('#excel-price-wire50').val($('#excel-price-wire50').find('option').eq(prc_wire50_index - 1).text()).trigger("change");
+    }
+    if(prc_wire25_index > 0) {
+        $('#excel-price-wire25').val($('#excel-price-wire25').find('option').eq(prc_wire25_index - 1).text()).trigger("change");
+    }
+    $('table').delegate('th', 'mousedown', function(e){
+        e.preventDefault();
+        if(!$(this).hasClass('enabled')) {
+            return;
+        }
+        var focused = $(':focus');
+        var index = $(this).index();
+        if(focused.prop("tagName") == "SELECT") {
+            focused.val(focused.find('option').eq(index).val());
+        }
+        focused.trigger('change');
+    });
+    $('body').delegate('.manual-manufacturer-link', 'click', function(e){
+        e.preventDefault();
+        var container = $(this).parent().find('.manual-manufacturer-list');
+        $(this).parent().find('select.form-control').remove();
+        container.html('<div class="spinner"> <div class="rect1"></div> <div class="rect2"></div> <div class="rect3"></div> <div class="rect4"></div> <div class="rect5"></div> </div>');
+        if (manufacturers_list) {
+            draw_manufacturers(manufacturers_list, container);
+        } else {
+            load_all_manufacturers(function(data){
+                manufacturers_list = data;
+                draw_manufacturers(data, container);
+            });
+        }
+    });
+    $('#publish-result-button').click(function(e){
+        e.preventDefault();
+        var t = $(this);
+        t.hide();
+        t.parent().find(".spinner").show();
+        publish(agent_id, key, function(data) {
+            $('#sucessful-publish').show();
+            t.parent().find(".spinner").hide();
+        });
+    });
+
+    $('body').delegate('#product-suggestion', 'change', function(){
+        var manufacturer =$(this).find(':selected').parent().attr('label').toLowerCase();
+        $('.manual-manufacturer-select').val(manufacturer).trigger('change');
+        var v = $('.manual-manufacturer-select')[0];
+        var keyboardEvent = document.createEvent("KeyboardEvent");
+        var initMethod = typeof keyboardEvent.initKeyboardEvent !== 'undefined' ? "initKeyboardEvent" : "initKeyEvent";
+
+
+        keyboardEvent[initMethod](
+                        "keyup",
+                            true, 
+                            true,
+                            window,
+                            false, 
+                            false, 
+                            false, 
+                            false, 
+                            40, 
+                            0 
+        );
+        if(v) {
+            v.focus();
+            v.dispatchEvent(keyboardEvent);
+        }
+    });
+
+    $('#skip-manufacturer').click(function(e){
+        e.preventDefault();
+        filterWithoutManufacturerCheck();
+    });
+
+    var rowpos = $('#excel-content table tr').eq(potential_start).position();
+    $('#excel-content').animate({scrollTop: rowpos.top}, 600);
+});
+</script>
+{% end %}

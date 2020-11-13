@@ -1,0 +1,13 @@
+{% from web.handlers.BaseHandler import Role %}
+{% extends "base.html" %}
+
+{% block content %}
+
+{% for task in supplier_tasks %}
+    <div>
+    <a href="/products/tasks/{{ task["supplier_id"] }}/view/">{{task["tasks"]}} товаров</a> 
+    <strong class="ml-3"><a href="/agents/{{ task["supplier_id"] }}/view/">{{ task["company_name"] }}</a></strong>
+    </div>
+{% end %}
+
+{% end %}

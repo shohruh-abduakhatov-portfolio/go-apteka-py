@@ -1,0 +1,33 @@
+{% extends "../base.html" %}
+{% block headline %} Закуп {% end %}
+{% block head %}
+
+{% end %}
+{% block body %}
+<div class="container">
+    <h3>Закуп:</h3>
+    <div class="tabbable">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link {% if request.uri == "/procurement/search" %} active {% end %}" href="/procurement/search">
+                Поиск Провизий
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.uri == "/procurement/" %} active {% end %}" href="/procurement/">
+                Провизии
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.uri == "/procurement/basket/" %} active {% end %}" href="/procurement/basket">
+                Корзина <span class="badge badge-secondary badge-danger">1</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <div class="bg-white pl-1 pr-1 pt-4 pl-lg-4 pb-3 pr-lg-4 border-left border-right border-bottom">
+        {% block content %}
+        {% end %}
+    </div>
+</div>
+{% end %}

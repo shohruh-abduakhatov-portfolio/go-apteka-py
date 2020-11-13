@@ -1,0 +1,712 @@
+{% extends "../base.html" %}
+{% block headline %} Поиск {% end %}
+{% block header %}
+<style>
+
+    #searchField, #new-search-quantity {
+        background-color: inherit;
+        outline: 0;
+        border-radius: 0;
+        text-align: center;
+        font-family: "Droid Sans";
+        /*border-bottom: 2px ;*/
+        border-width: 0 0 1px;
+        /*border-color: #292e2b;*/
+        border-color: rgba(41, 46, 43, .5);
+        font-size: 1.4em;
+        width: 60%;
+        height: 5rem;
+    }
+
+
+    #cart-add {
+        z-index: 1;
+        cursor: pointer;
+        transition:         0.08s ease-in;
+        -o-transition:      0.08s ease-in;
+        -ms-transition:     0.08s ease-in;
+        -moz-transition:    0.08s ease-in;
+        -webkit-transition: 0.08s ease-in;
+        height: 3.8em;
+        font-size: 1.4em;
+    }
+
+    #cart-add:hover {
+        color: #f0f0f0;
+        background-color: #217e42;
+        transition-duration: 350ms;
+    }
+
+    #cart-contents-div {
+        width: 60%;
+    }
+
+   .del-cart-button {
+       position: absolute;
+       right: 0;
+       display: inline-block;
+       margin-right: 1em;
+       background-color: inherit;
+   }
+
+   .delete-item {
+       background-color: inherit;
+       border: none;
+   }
+
+    .item-quantity {
+        position: absolute;
+        left: 0;
+        display: inline-block;
+        margin-left: 1em;
+    }
+
+    #move-to-mivs {
+        background-color: #28a745;
+        text-decoration: none;
+        display: none;
+
+    }
+
+
+
+</style>
+{% end %}
+{% block body %}
+<div class="px-3 mx-auto text-center">
+    <h1 class="display-4">Поиск лекарств</h1>
+    <p></p>
+    <br>
+    <input type="text" id="searchField" placeholder="Введите название продукта...">
+
+    <p></p>
+    <br>
+
+    <input type="number" id="new-search-quantity" min="1" max="999" placeholder="Введите количество..." style="display: none">
+
+    <p></p>
+    <br>
+
+    <button type="button" id="cart-add" class="btn btn-secondary" style="display: none"><i class="fas fa-cart-plus"></i> Добавить в корзину</button>
+
+    <p></p>
+    <br>
+
+    <div id="cart-contents-div" class="px-3 mx-auto">
+
+        <div class="cart-items-block" >
+
+            <div id="cart-empty-text" style="display: none">
+                <h3 class="text-center">Корзина пуста</h3>
+            </div>
+
+
+            <div class="loading text-center">
+                <div class="loading_content">
+                    <div class="spinner-border" role="status">
+                        <span class="sr-only"></span>
+                    </div>
+                    <div>Загружаем содержимое корзины...</div>
+                </div>
+            </div>
+        </div>
+
+      <ul id="cart-contents" class="list-group">
+      </ul>
+
+        <p></p>
+        <br>
+
+        <a href="/procurement/basket" id="move-to-mivs" class="btn btn-secondary"><i class="fas fa-calculator"></i> Приступить к закупу</a>
+        <button id="clear-basket" class="btn btn-danger"><i class="fa fa-remove"></i> Очистить корзину</button>
+
+    </div>
+
+
+</div>
+
+
+<div class="large-loading text-center">
+        <div id="action-processing">
+            <div class="spinner">
+                <div class="rect1"></div>
+                <div class="rect2"></div>
+                <div class="rect3"></div>
+                <div class="rect4"></div>
+                <div class="rect5"></div>
+            </div>
+            <h2>В процессе...</h2>
+        </div>
+        <div id="action-complete" style="max-width: 400px;" class="mx-auto mt-6 hidden">
+            <div class="alert alert-success" role="alert">
+                <h4 class="alert-heading">Добавлено!</h4>
+                <p>Успешно добавлено в корзину</p>
+                <hr>
+                <button type="button" class="mb-0 close-success">Закрыть</button>
+            </div>
+
+            <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading">Не удалось добавить товар</h4>
+                <p></p>
+                <hr>
+                <button type="button" class="mb-0 close-success">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+{% end %}
+
+{% block bottom %}
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/jszip.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.8.0/xlsx.js"></script>
+<script>
+    var m_json_object = {};
+    var ExcelToJSON = function () {
+
+        this.parseExcel = function (file) {
+            var reader = new FileReader();
+
+            reader.onload = function (e) {
+                var data = e.target.result;
+                var workbook = XLSX.read(data, {type: 'binary'});
+                var first_sheet_name = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[first_sheet_name];
+                result = XLSX.utils.sheet_to_json(worksheet, {header: 1, raw: false});
+                var json_object = JSON.stringify(result);
+                console.log("result");
+                console.log(JSON.parse(json_object));
+                m_json_object = json_object;
+                {#jQuery('#xlx_json').val(json_object);#}
+
+            };
+
+            reader.onerror = function (ex) {
+                console.log(ex);
+            };
+            reader.readAsBinaryString(file);
+        };
+    };
+
+    function handleFileSelect(evt) {
+        var files = evt.target.files; // FileList object
+        var xl2json = new ExcelToJSON();
+        xl2json.parseExcel(files[0]);
+    }
+</script>
+
+<script>
+    /*
+    document.getElementById('upload').addEventListener('change', handleFileSelect, false);
+    $('#upload_excel').on('click', function () {
+        if (m_json_object !== {}) {
+            {#console.log("result");#}
+            {#console.log(JSON.parse(m_json_object));#}
+            var request = $.ajax({
+                url: "/procurement/basket/upload_file",
+                type: "post",
+                data: m_json_object,
+                dataType: "json",
+                error: function (data) {
+                    alert("error");
+                },
+                success: function (data) {
+                    alert("Добавлено в корзину: ", productId);
+                {#    TODO remove loader#}
+                }
+            });
+        }
+    });
+    */
+</script>
+
+<script src="{{ static_url('js/autocomplete.js') }}"></script>
+<script>
+
+    var Toast = Swal.mixin({
+          toast: true,
+          position: 'bottom-start',
+          showConfirmButton: false,
+          timer: 3000
+        });
+
+
+    function loadCartContents(params) {
+
+
+            $('.cart-items-block .loading').show();
+            $('#move-to-mivs').hide();
+            $('#clear-basket').hide();
+
+            var main_ul = $('#cart-contents');
+            main_ul.empty();
+
+            var request = $.ajax({
+                url: "/procurement/cart_items/data.json",
+                type: "post",
+                data: params,
+                dataType: "json",
+
+                error: function (data) {
+                    console.log('error')
+
+                },
+
+                success: function (data) {
+
+                    console.log('data: ', data);
+
+                    if (data) {
+
+
+                        var h1 = $('<h1></h1>');
+                        h1.text('В корзине:');
+                        main_ul.append(h1);
+
+                        // DATA ENTRIES
+                        var result = data.result;
+                        console.log(result);
+
+                        var li = $('<li></li>');
+                        li.attr('class', 'list-group-item');
+
+                        Object.entries(result).forEach(function (entry) {
+
+                            // GETTING SUPPLIER NAMES
+
+                            li.empty();
+                            li.addClass('list-group-item');
+
+                            var btnDiv = $('<div></div>');
+                            btnDiv.attr('class', 'del-cart-button');
+                            btnDiv.attr('title', 'Удалить из корзины');
+                            btnDiv.attr('data-provision-id', entry[1].provision_id);
+
+                            var button = $('<button></button>');
+                            button.attr('class', 'delete-item');
+
+                            var i = $('<i></i>');
+                            i.attr('class', 'fa fa-remove text-danger fa-lg');
+                            button.append(i);
+
+                            btnDiv.append(button);
+
+                            var span = $('<span></span>');
+                            span.attr('class', 'badge badge-success item-quantity');
+                            span.text(entry[1].quantity + " шт.");
+
+                            li.append(span);
+                            li.append(entry[1].name + " (" + entry[1].manufacturer + ")" );
+                            li.append(btnDiv);
+
+                            main_ul.append(li.clone());
+
+                        });
+
+
+                    } else {
+                        console.log('data in error - ', data);
+                        var a = data["message"];
+                        alert(a);
+
+                    }
+
+                    if ($('#cart-contents').find('li').length < 1) {
+                        $('#cart-empty-text').show();
+                        $('#cart-contents').find('h1').hide()
+                    }
+
+                    else {
+                        $('#move-to-mivs').show();
+                        $('#clear-basket').show();
+                        $('#cart-contents').find('h1').show()
+                    }
+
+                    $('.cart-items-block .loading').hide();
+
+
+                }
+            });
+        // }
+
+
+    }
+
+    $(document).keypress(function (e) {
+             var key = e.which;
+             if(key == 13)  // the enter key code
+              {
+
+
+                    if ($('#searchField').val() !== '') {
+                        $('#cart-add').click();
+                        return false;
+                    }
+
+                    else {
+                        Swal.fire({
+                          title: 'Введите название товара',
+                          text: '',
+                          type: 'warning',
+                          confirmButtonText: 'OK'
+                        });
+
+                        e.stopPropagation()
+
+                    }
+
+
+              }
+            });
+
+
+    $(document).ready(function () {
+
+        var token = Cookies.get("_xsrf");
+
+        $.ajaxSetup({
+            headers: {
+                "X-XSRFToken": token
+            }
+        });
+
+
+        loadCartContents();
+
+        $("#new-search-quantity").on("keypress keyup blur",function (event) {
+           $(this).val($(this).val().replace(/[^\d].+/, ""));
+            if ((event.which < 48 || event.which > 57)) {
+                event.preventDefault();
+            }
+        });
+
+
+        $('#clear-basket').on('click', function() {
+
+            if ( ($('#cart-contents').find('li').length > 0) ) {
+                Swal.fire({
+                title: 'Очистить корзину?',
+                text: 'Все товары будут удалены из корзины!',
+                type: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'OK',
+                cancelButtonText: 'Нет',
+            }).then((result) => {
+              if (result.value) {
+                $('#clear-basket').attr('disabled', 'disabled');
+
+                $('.large-loading').fadeIn('fast');
+
+                $.ajax({
+                    "url": "/procurement/basket/clear_basket",
+                    type: "post",
+                    dataType: "json",
+
+                    error: function (data) {
+                        Swal.fire({
+                            title: 'Ошибка',
+                            text: '',
+                            type: 'error',
+                            confirmButtonText: 'OK'
+                        });
+
+                        $('.large-loading').fadeOut('fast');
+                    },
+
+                    success: function (data) {
+
+                        Swal.fire({
+                                  title: 'Корзина очищена',
+                                  text: '',
+                                  type: 'success',
+                                  confirmButtonText: 'OK'
+                                });
+
+                        loadCartContents();
+
+                        $('.large-loading').fadeOut('fast');
+
+                    }
+
+                });
+
+                $('#clear-basket').removeAttr('disabled');
+
+              }
+            })
+
+            }
+
+            else {
+                Swal.fire({
+                    title: 'Корзина пуста',
+                    type: 'error',
+                    confirmButtonText: 'OK'
+                })
+            }
+
+
+        });
+
+
+
+        $('#cart-contents').on('click', '.del-cart-button', function() {
+
+            var button = $(this);
+            var listElem = button.parent();
+
+            $('.large-loading').fadeToggle('fast');
+
+            var params = {};
+            params["provision_id"] = $(this).attr('data-provision-id');
+
+            var req = $.ajax({
+                url: "/procurement/basket/remove_item",
+                type: "post",
+                data: params,
+                dataType: "json",
+
+                error: function (data) {
+                    alert("error");
+                },
+
+                success: function (data) {
+
+                    Swal.fire({
+                      title: 'Товар удален из корзины',
+                      text: '',
+                      type: 'success',
+                      confirmButtonText: 'OK'
+                    });
+
+                    //listElem.fadeOut(300, function(){ listElem.remove() });
+                    listElem.remove();
+
+                    $('.large-loading').fadeToggle('fast');
+
+                    if ($('#cart-contents').find('li').length < 1) {
+                        $('#cart-empty-text').show();
+                        $('#move-to-mivs').hide();
+                        $('#clear-basket').hide();
+                        $('#cart-contents').find('h1').hide()
+                    }
+
+                    else {
+                        $('#cart-empty-text').hide();
+                    }
+
+
+                }
+
+            });
+
+
+
+        });
+
+
+        $('#searchField').autocomplete({
+            serviceUrl: '/autocomplete/query/',
+            groupBy: 'category',
+            width: 'flex',
+
+            onSearchComplete: function (query, suggestion) {
+
+                Object.entries(suggestion).forEach(function (s) {
+
+                    var p = $(".autocomplete-suggestions").find("[data-index='" + s[0] + "']");
+
+                    if (s[1].available === 1) {
+                        //$(p).append($('<i class="fas fa-check text-success"></i>'))
+                        $(p).append($('<span class="badge badge-success">Есть цены</span>'))
+                    }
+                    else {
+                        //$(p).append($('<i class="fas fa-remove text-danger"></i>'))
+                        $(p).append($('<span class="badge badge-danger">Цен нет</span>'))
+                    }
+                })
+
+            },
+
+            onSelect: function (suggestion) {
+                console.log('You selected: ' + suggestion.value + ', ' + suggestion.data);
+                $('#searchField').attr('data-product-id', suggestion.data["id"]);
+
+                $('#new-search-quantity').fadeIn(200);
+                $('#cart-add').fadeIn(200);
+
+            }
+        });
+
+        $('#cart-add').on('click', function() {
+                $('.large-loading').fadeIn('fast');
+
+                var main_ul = $('#cart-contents');
+
+                var productName = $('#searchField').val();
+
+                var searchField = $('#searchField');
+
+                if (searchField.attr('data-product-id') !== '' && searchField.attr('data-product-id') !== 'undefined' ) {
+
+                    var params = {};
+                    var productId = $('#searchField').attr('data-product-id');
+                    var quantity = $('#new-search-quantity').val();
+                    params["product_id"] = productId;
+                    params["quantity"] = quantity;
+
+                    var request = $.ajax({
+                        url: "/procurement/basket/add_item",
+                        type: "post",
+                        data: params,
+                        dataType: "json",
+
+                        error: function (data) {
+
+                            Swal.fire({
+                                title: 'Ошибка',
+                                text: data,
+                                type: 'error',
+                                confirmButtonText: 'OK'
+                            });
+
+                            $('.large-loading').fadeOut('fast');
+
+                        },
+
+                        success: function (data) {
+
+                            if (data["message"] == 'OK') {
+
+
+                                var add_li = $('<li></li>');
+                                add_li.attr('class', 'list-group-item');
+                                add_li.text(productName);
+                                add_li.addClass('list-group-item');
+
+                                var span = $('<span></span>');
+                                span.attr('class', 'badge badge-success item-quantity');
+                                span.text("" + data["quantity"] + " шт.");
+
+                                var btnDiv = $('<div></div>');
+                                btnDiv.attr('class', 'del-cart-button');
+                                btnDiv.attr('title', 'Удалить из корзины');
+                                btnDiv.attr('data-provision-id', data["result"]);
+
+                                var button = $('<button></button>');
+                                button.attr('class', 'delete-item');
+
+                                var i = $('<i></i>');
+                                i.attr('class', 'fa fa-remove text-danger fa-lg');
+                                button.append(i);
+
+                                btnDiv.append(button);
+
+                                add_li.append(span);
+                                add_li.append(btnDiv);
+
+                                main_ul.append(add_li);
+
+                                add_li.show('slow');
+
+                                Toast.fire({
+                                  type: 'success',
+                                  title: 'Добавлено: ' + productName
+                                });
+
+
+                                /*
+                                Swal.fire({
+                                    title: 'Товар добавлен в корзину',
+                                    text: '',
+                                    type: 'success',
+                                    confirmButtonText: 'OK'
+                                });
+                                */
+
+
+                            } else {
+
+                                Swal.fire({
+                                    title: 'Ошибка',
+                                    text: data["message"],
+                                    type: 'error',
+                                    confirmButtonText: 'OK'
+                                });
+
+                            }
+
+                            $('#searchField').attr('data-product-id', '');
+                            $('#searchField').val('');
+                            $('#new-search-quantity').val('');
+                            $('.large-loading').fadeOut('fast');
+
+
+                            if ($('#cart-contents').find('li').length > 0) {
+                                $('#cart-empty-text').hide();
+                            }
+
+                        }
+                    });
+                }
+
+                else {
+
+                }
+
+        });
+
+
+    });
+</script>
+
+{% end %}
+
+
+    <!-- Search Box -->
+    <!--
+    <div class="navbar-collapse" id="navbarNavDropdown">
+        <form class="mx-2 my-auto mr-5 d-inline w-100" enctype="multipart/form-data">
+            <div class="input-group">
+                <input type="number" id="search_quantity" class="form-control" min="1" max="9999" value="1" >
+                <input type="text" id="autocomplete_search" data-product-id="" class="form-control border border-right-0" placeholder="">
+                <span class="input-group-append">
+                        <button class="btn btn-outline-secondary border border-left-0" type="button"
+                                data-toggle="collapse" data-target="#fileImporter" aria-expanded="false"
+                                aria-controls="fileImporter">
+                          <i class="fa fa-file-excel-o"></i>
+                        </button>
+                        <button id="add-to-cart" class="btn btn-outline-secondary border border-left-0" type="button">
+                          <i class="fas fa-cart-plus text-success"></i>
+                        </button>
+                  </span>
+            </div>
+        </form>
+    </div>
+    -->
+    <!-- Excel File importer -->
+    <!--
+    <div class="container collapse" id="fileImporter">
+        <div class="row">
+            <div class="col-md-auto">
+                <label for="upload" id="upload_label" style="vertical-align: -moz-middle-with-baseline;">Выберите Excel
+                    файл для загрузки:</label>
+            </div>
+            <div class="col">
+                <input class="btn btn-outline-primary" id="upload" type="file" name="files[]"
+                       accept=".xlsx, .xlw, .xls, .xlt" style="vertical-align: -moz-middle-with-baseline;">
+            </div>
+            <div class="col-md-auto">
+                <button id="upload_excel" type="submit" class="btn btn-primary">Добавить в корзину</button>
+            </div>
+        </div>
+    </div>
+
+
+    </form>
+
+
+{#    <textarea class="form-control" rows=35 cols=120 id="xlx_json"></textarea>#}
+-->

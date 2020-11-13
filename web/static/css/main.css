@@ -1,0 +1,756 @@
+body,
+wrapper {
+    min-height: 100vh;
+}
+
+.flex-fill {
+    flex: 1 1 auto;
+}
+
+nav.top-nav a {
+    cursor: pointer;
+}
+
+.top-nav a.active {
+    color: #0275d8 !important;
+    border-bottom: 3px solid #0275d8;
+}
+
+nav.top-nav a:hover {
+    text-decoration: none;
+    color: #0275d8 !important;
+    border-bottom: 3px dashed #0275d8;
+}
+
+.card {
+    display: inline-block;
+    vertical-align: top;
+}
+
+.excel-content {
+    font-size: 10px;
+    overflow: scroll;
+    height: 70vh;
+}
+
+.excel-type {
+    border: 1px solid transparent;
+    cursor: pointer;
+}
+
+.excel-type span {
+    white-space: nowrap;
+    line-height: 40px;
+}
+
+.excel-content tbody td {
+    border: 1px solid #000;
+}
+
+.excel-content th {
+    background: #939ba4;
+    color: #fff;
+    cursor: pointer;
+    border: 1px solid #000;
+    box-shadow: 1px 2px 26px -3px #000;
+}
+
+.excel-content th.enabled {
+    background: #166cc3;
+}
+
+.excel-content th.enabled:hover {
+    background: #0d3d6c;
+}
+
+.switch-light {
+    width: 140px;
+    margin-top: 4px;
+    margin-right: 4px;
+    cursor: pointer;
+}
+
+.switch-light>span {
+    width: 100%;
+    height: 30px;
+    line-height: 30px;
+    font-size: 13px;
+}
+
+.pick-from-excel,
+.percentage {
+    text-align: right;
+    display: flex;
+    margin-left: auto;
+}
+
+.percentage .form-control {
+    height: 34px;
+    width: 54px;
+    margin-top: 2px;
+    display: inline-block;
+}
+
+.percentage {
+    height: 38px;
+}
+
+.percentage span {
+    font-size: 20px;
+    margin-left: 7px;
+    margin-right: 4px;
+    margin-top: 4px;
+}
+
+tr.ignore {
+    opacity: 0.4;
+}
+
+.excel-content thead tr:nth-child(1) th {
+    position: sticky;
+    top: -2px;
+    height: 3em;
+    font-size: 1.3em;
+    z-index: 10;
+    padding-top: 0;
+    margin-top: -1px;
+    text-shadow: 0 0 3px #000;
+}
+
+.excel-content table {
+    table-layout: fixed;
+}
+
+.excel-content table th {
+    min-width: 80px;
+}
+
+.excel-content table thead {
+    text-align: center !important;
+    overflow: scroll;
+}
+
+.excel-content td {
+    max-width: 160px;
+}
+
+.excel-modification-group select.form-control {
+    width: 80px;
+    display: inline-block;
+    margin-top: 5px;
+    text-align: center;
+    margin-right: 6px;
+}
+
+/*.excel-type label, .excel-type span {
+    margin-right: 8px;
+    line-height: 38px;
+}*/
+
+i.square {
+    display: inline-block;
+    width: 18px;
+    height: 18px;
+    margin-right: 12px;
+    border-radius: 100%;
+    vertical-align: middle;
+}
+
+.prd-active {
+    background-color: rgb(146, 198, 255) !important;
+}
+
+.exl-prd-active {
+    background-color: rgb(146, 198, 255) !important;
+}
+
+.mnf-active {
+    background-color: #88d098 !important;
+}
+
+.exl-mnf-active {
+    background-color: #88d098 !important;
+}
+
+.prc-active {
+    background-color: #ffb4b3 !important;
+}
+
+.prc-base-active {
+    background-color: #b83835 !important;
+}
+
+.load-active {
+    background-color: #e680d9 !important;
+}
+
+.quantity-active {
+    background-color: #ff8b38 !important;
+}
+
+.excel tr td:first-child,
+.excel tr th:first-child {
+    width: 60px;
+    background: #166cc3;
+    line-height: 100%;
+    font-size: 14px;
+    color: #fff;
+    text-shadow: 0px 0px 3px #000;
+    height: 100%;
+    text-align: center;
+}
+
+.exl-prc-active,
+.exl-prc-wire100-active,
+.exl-prc-wire75-active,
+.exl-prc-wire50-active,
+.exl-prc-wire25-active {
+    background-color: #ffb4b3 !important;
+}
+
+.exp-active {
+    background-color: #c9b3ff;
+}
+
+.exl-exp-active {
+    background-color: #c9b3ff !important;
+}
+
+.excel-modification {
+    /*display: none; */
+}
+
+.excel-modification h5 {
+    margin: 0;
+}
+
+.excel-modification hr {
+    margin: 0 0;
+}
+
+#second-progress {
+    display: none;
+}
+
+#second-progress h3,
+#manufacturer-progress h3 {
+    text-align: center;
+}
+
+/* preloader */
+
+.spinner {
+    margin: 25px auto;
+    width: 50px;
+    height: 40px;
+    text-align: center;
+    font-size: 10px;
+}
+
+.spinner>div {
+    background-color: #0569b1;
+    height: 100%;
+    width: 6px;
+    display: inline-block;
+    -webkit-animation: sk-stretchdelay 1.2s infinite ease-in-out;
+    animation: sk-stretchdelay 1.2s infinite ease-in-out;
+}
+
+.spinner .rect2 {
+    -webkit-animation-delay: -1.1s;
+    animation-delay: -1.1s;
+}
+
+.spinner .rect3 {
+    -webkit-animation-delay: -1s;
+    animation-delay: -1s;
+}
+
+.spinner .rect4 {
+    -webkit-animation-delay: -0.9s;
+    animation-delay: -0.9s;
+}
+
+.spinner .rect5 {
+    -webkit-animation-delay: -0.8s;
+    animation-delay: -0.8s;
+}
+
+@-webkit-keyframes sk-stretchdelay {
+
+    0%,
+    40%,
+    100% {
+        -webkit-transform: scaleY(0.4);
+    }
+
+    20% {
+        -webkit-transform: scaleY(1);
+    }
+}
+
+@keyframes sk-stretchdelay {
+
+    0%,
+    40%,
+    100% {
+        transform: scaleY(0.4);
+        -webkit-transform: scaleY(0.4);
+    }
+
+    20% {
+        transform: scaleY(1);
+        -webkit-transform: scaleY(1);
+    }
+}
+
+/* end */
+
+#second-filter {
+    display: none;
+}
+
+/*.card-body {
+    padding: 0.25rem;
+}*/
+
+#conflicted .col-xs-6 {
+    max-width: 20vw;
+}
+
+.second-filter-result tr {
+    cursor: pointer;
+}
+
+.second-filter-result tr:nth-child(even) {
+    background: #ccc;
+}
+
+.second-filter-result tr:nth-child(odd) {
+    background: #fff;
+}
+
+.second-filter-result td {
+    padding: 6px;
+}
+
+.second-filter-result .fa {
+    color: red;
+}
+
+.fa.positive {
+    color: green;
+}
+
+p.error {
+    color: red;
+    font-size: 20px;
+}
+
+p.error::before {
+    display: inline-block;
+    padding-right: 12px;
+    font-style: normal;
+    font-variant: normal;
+    text-rendering: auto;
+    -webkit-font-smoothing: antialiased;
+}
+
+p.error::before {
+    font-family: FontAwesome;
+    font-weight: 900;
+    content: "\f06a";
+}
+
+.modal-dialog {
+    position: relative;
+    display: table;
+    overflow-y: auto;
+    overflow-x: auto;
+    width: auto;
+    max-width: 100%;
+}
+
+.hidden {
+    display: none !important;
+}
+
+.card .spinner {
+    margin: 0 auto;
+}
+
+.card .buttons {
+    position: relative;
+}
+
+.card .loading,
+.large-loading {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+}
+
+.large-loading {
+    background: rgba(255, 255, 255, 0.92);
+}
+
+a.manual-manufacturer-link {
+    text-decoration: none;
+    margin-top: 10px;
+    margin-left: -8px;
+}
+
+a.manual-manufacturer-link:focus {
+    box-shadow: none;
+}
+
+@media (min-width: 1200px) {
+    #upload .container {
+        max-width: 1400px;
+    }
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+    #upload .container {
+        max-width: 920px;
+    }
+}
+
+#rowModal .card-text {
+    color: gray;
+}
+
+#rowModal .modal-body p.medium {
+    font-weight: 600;
+    font-size: 1.5em;
+}
+
+#rowModal .modal-dialog {
+    max-width: 80vw;
+}
+
+.btn-cancel {
+    margin-left: auto !important;
+}
+
+.excel-modification-group h6 {
+    margin: 0;
+    min-height: 48px;
+}
+
+.excel-modification-group .col-sm-6 {
+    padding: 0 8px;
+}
+
+.top-alert .card {
+    border: none;
+}
+
+#conflicted-manufacturers {
+    margin-left: -0.5rem;
+    margin-right: -0.5rem;
+}
+
+#publish-result-button {
+    margin: 0 auto;
+    display: block;
+    max-width: 300px;
+}
+
+#sucessful-publish {
+    margin: 0 auto;
+    max-width: 500px;
+}
+
+#conflicted-manufacturers .col {
+    min-height: 178px;
+}
+
+.tasks-table i.manual {
+    color: #f00;
+    padding-left: 8px;
+}
+
+.tasks-table i.automatic {
+    color: #369836;
+    padding-left: 8px;
+}
+
+.table td {
+    padding: 0.25rem;
+}
+
+.tasks-table td:first-child {
+    text-align: center;
+}
+
+.dataTable tbody tr {
+    cursor: pointer;
+}
+
+.dataTable.table-striped tbody tr:hover {
+    background: #0275d833;
+    border: 1px solid #000;
+    box-shadow: 0px 0px 3px 1px rgba(0, 0, 0, 0.5);
+}
+
+.dataTable.table-striped tbody tr.selected {
+    background: #0275d8;
+    color: #fff;
+    text-shadow: 0px 0px 1px #000;
+}
+
+.dataTable.table-striped tbody tr:hover i {
+    color: #fff !important;
+}
+
+.dataTable.table-striped tbody tr.selected i {
+    color: #fff !important;
+}
+
+.open>.dropdown-menu {
+    display: block;
+}
+
+.dropdown-item {
+    cursor: pointer;
+}
+
+.dropdown-item:focus,
+.dropdown-item:hover {
+    color: #fff;
+    text-decoration: none;
+    background-color: #0275d8;
+}
+
+dropdown-item:focus,
+.dropdown-item.danger:hover {
+    color: #fff;
+    text-decoration: none;
+    background-color: #d9534f;
+}
+
+#websocket-status {
+    font-size: 1.6em;
+    color: #d9534f;
+    position: absolute;
+    top: 0.6em;
+    right: 17px;
+}
+
+#websocket-status.active {
+    color: #28a745 !important;
+}
+
+.navbar-toggler {
+    margin-right: 2.8em;
+    min-height: 53px;
+    margin-bottom: 0.4em;
+    margin-bottom: 0.2em;
+    margin-top: 0.1em;
+}
+
+.top-nav .nav-link {
+    border-top: 3px solid transparent;
+    border-bottom: 3px solid transparent;
+}
+
+@media (min-width: 992px) {
+    .navbar-expand-lg .navbar-nav .nav-link {
+        padding-right: 0;
+        margin-right: 0.5rem;
+        padding-left: 0;
+        margin-left: 0.5rem;
+    }
+}
+
+@media (max-width: 992px) {
+    .container {
+        padding-left: 0;
+        padding-right: 0;
+    }
+}
+
+.nav-tabs .nav-link {
+    border-top-width: 4px;
+}
+
+.nav-tabs .nav-item.show .nav-link,
+.nav-tabs .nav-link.active {
+    color: #495057;
+    background-color: #fff;
+    border-color: #6c757d #dee2e6 #fff;
+}
+
+.tabbable .nav-tabs {
+    overflow-x: auto;
+    overflow-y: hidden;
+    flex-wrap: nowrap;
+}
+
+.nav-link {
+    white-space: nowrap;
+}
+
+.tabbable .nav-tabs {
+    -ms-overflow-style: none;
+    overflow: -moz-scrollbars-none;
+}
+
+.tabbable .nav-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.relative {
+    position: relative;
+}
+
+.top-alert .alert {
+    white-space: nowrap;
+}
+
+a.manual-manufacturer-link {
+    color: #7eb1e8;
+}
+
+.nav-tabs .nav-link {
+    border-radius: 6px 6px 0 0;
+}
+
+.nav-tabs {
+    position: relative;
+    border: none;
+}
+
+.nav-tabs::before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.nav-tabs .nav-item {
+    position: relative;
+}
+
+.agent-header,
+.pricing-header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.pricelist-content-table {
+    font-size: 14px;
+    line-height: 15px;
+}
+
+.pricelist-content-table td {
+    padding: 5px;
+}
+
+.manufacturer-block .card-text {
+    max-width: 380px;
+}
+
+.file-alert {
+    line-height: 24px;
+}
+
+.autocomplete-suggestions {
+    border: 1px solid #999;
+    max-width: 60vw;
+    background: #fff;
+    overflow: auto;
+}
+
+.autocomplete-suggestion {
+    padding: 2px 5px;
+    overflow: hidden;
+}
+
+.autocomplete-selected {
+    background: #f0f0f0;
+}
+
+.autocomplete-suggestions strong {
+    font-weight: normal;
+    color: #3399ff;
+}
+
+.autocomplete-group {
+    padding: 2px 5px;
+    font-size: 13px;
+    background: #e4e4e4;
+    text-align: center;
+}
+
+.autocomplete-group strong {
+    display: block;
+    border-bottom: 1px solid #000;
+}
+
+.agent-info {
+    max-width: 600px;
+    font-size: 1.25rem;
+    font-weight: 300;
+}
+
+.site-header {
+    font-size: 1.8rem;
+    font-weight: 300;
+}
+
+#create-user-form .required {
+    color: red;
+    font-size: 1.3em;
+    display: inline-block;
+    vertical-align: middle;
+    font-weight: bold;
+    line-height: 0em;
+}
+
+.locations ul {
+    list-style: none;
+}
+
+.locations {
+    height: 348px;
+    overflow: scroll;
+}
+
+.product-autocomplete {
+    display: none;
+}
+
+#action-processing {
+    position: fixed;
+    margin: 0 auto;
+    top: 33%;
+    right: 44%;
+}
+
+.del-cart-button {
+   position: absolute;
+   right: 0;
+   display: inline-block;
+   margin-right: 1em;
+   background-color: inherit;
+}
+
+.delete-item {
+   background-color: inherit;
+   border: none;
+}
+
+.item-quantity {
+    position: absolute;
+    left: 0;
+    display: inline-block;
+    margin-left: 1em;
+}

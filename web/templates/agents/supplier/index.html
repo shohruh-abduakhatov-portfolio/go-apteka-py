@@ -1,0 +1,40 @@
+{% extends "../base.html" %}
+{% block headline %} Прайсы {% end %}
+{% block head %}
+
+{% end %}
+{% block body %}
+<div class="container">
+    <h3>Прайс листы</h3>
+    <hr/>
+    <div class="tabbable">
+    <ul class="nav nav-tabs">
+
+        <li class="nav-item">
+            <a class="nav-link {% if request.uri == "/pricelist/" %} active {% end %}" href="/pricelist/">
+            Проблемные
+            </a>
+        </li>
+      <li class="nav-item">
+        <a class="nav-link {% if request.uri == "/pricelist/active/list/" %} active {% end %}" href="/pricelist/active/list/">
+            Активные
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {% if request.uri == "/uploads/successful" %} active {% end %}" href="/uploads/successful">
+            История
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link {% if request.uri == "/uploads/rejected" %} active {% end %}" href="/uploads/rejected">
+            Отклоненные
+        </a>
+      </li>
+      
+    </ul></div>
+    <div class="bg-white pl-1 pr-1 pt-4 pl-lg-4 pr-lg-4  border-left border-right border-bottom">
+        {% block content %}
+        {% end %}
+    </div>
+</div>
+{% end %}

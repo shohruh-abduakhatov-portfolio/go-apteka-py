@@ -1,0 +1,291 @@
+{% from web.handlers.BaseHandler import Role %}
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    
+    <link rel="apple-touch-icon" sizes="57x57" href="{{ static_url("apple-icon-57x57.png") }}">
+    <link rel="apple-touch-icon" sizes="60x60" href="{{ static_url("apple-icon-60x60.png") }}">
+    <link rel="apple-touch-icon" sizes="72x72" href="{{ static_url("apple-icon-72x72.png") }}">
+    <link rel="apple-touch-icon" sizes="76x76" href="{{ static_url("apple-icon-76x76.png") }}">
+    <link rel="apple-touch-icon" sizes="114x114" href="{{ static_url("apple-icon-114x114.png") }}">
+    <link rel="apple-touch-icon" sizes="120x120" href="{{ static_url("apple-icon-120x120.png") }}">
+    <link rel="apple-touch-icon" sizes="144x144" href="{{ static_url("apple-icon-144x144.png") }}">
+    <link rel="apple-touch-icon" sizes="152x152" href="{{ static_url("apple-icon-152x152.png") }}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ static_url("apple-icon-180x180.png") }}">
+    <link rel="icon" type="image/png" sizes="192x192"  href="{{ static_url("android-icon-192x192.png") }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ static_url("favicon-32x32.png") }}">
+    <link rel="icon" type="image/png" sizes="96x96" href="{{ static_url("favicon-96x96.png") }}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{{ static_url("favicon-16x16.png") }}">
+    <link rel="manifest" href="{{ static_url("manifest.json") }}">
+    <meta name="msapplication-TileColor" content="#ffffff">
+    <meta name="msapplication-TileImage" content="{{ static_url("ms-icon-144x144.png") }}">
+    <meta name="theme-color" content="#ffffff">
+
+    <link href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" media="all" rel="stylesheet" type="text/css"/>
+
+    <title>{% block headline %} {% end %} | Pharmex&reg; </title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="{{ static_url("bootstrap-4.3.1-dist/css/bootstrap.min.css") }}" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css" media="all" rel="stylesheet" type="text/css"/>
+    <!-- Custom styles for this template -->
+
+    <link href="{{ static_url("css/toggle-switch.css") }}" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{{ static_url("css/toastr.min.css") }}">
+    <link rel="stylesheet" type="text/css" href="{{ static_url("css/dataTables.bootstrap4.min.css") }}">
+
+    <link rel="stylesheet" type="text/css" href="{{ static_url("css/fixedHeader.bootstrap4.min.css") }}">
+    <link rel="stylesheet" type="text/css" href="{{ static_url("css/fixedColumns.bootstrap4.min.css") }}">
+
+{#      Loader#}
+    <link rel="stylesheet" type="text/css" href="{{ static_url("css/loader.css") }}">
+
+    <link href="{{ static_url("css/main.css") }}" rel="stylesheet">
+    <script type="text/javascript">
+        var WORKER_URL = "{{ static_url('js/web-worker.js') }}";
+    </script>
+      {% block head %}{% end %}
+  </head>
+
+  <body class="bg-light">
+  <div id="notification-warning" class="alert alert-success mb-0 hidden">
+  <strong>Внимание!</strong>  <a href="#" class="alert-link">Включите уведомления</a>.
+</div>
+    <wrapper class="d-flex flex-column">
+    
+      <div class="flex-fill relative">
+      <nav class="navbar top-nav navbar-expand-lg navbar-light bg-white border-bottom shadow-sm pb-0 pt-1 mb-4">
+        <a class="navbar-brand" href="/"><h4 class="my-0 mr-md-auto font-weight-normal">Pharmex&reg;</h4></a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNavDropdown">
+          <!--<ul class="navbar-nav">
+              <li class="nav-item">
+                <a id="products-link" class="nav-link {% if request.uri.find("/") == 0 %} active {% end %}" href="/">Поиск лекарств <span class="badge badge-secondary hidden">0</span></a>
+              </li>
+          </ul>
+          -->
+          <form class="mx-2 my-auto mr-5 d-inline w-100">
+            <!--
+            <div class="input-group">
+                <input type="text" id="autocomplete" class="form-control border border-right-0" placeholder="">
+                <span class="input-group-append">
+                  <button class="btn btn-outline-secondary border border-left-0" type="button">
+                      <i class="fa fa-search"></i>
+                  </button>
+                    <button class="btn btn-outline-secondary border border-left-0" id="top-bar-add-to-cart" type="button">
+                      <i class="fas fa-cart-plus text-success"></i>
+                  </button>
+                </span>
+            </div>
+            -->
+        </form>
+            {% if has_access(Role.PHARMA_CLIENT) %}
+            <a href="/" class="btn btn-outline-info mr-5" title="Поиск" style="text-decoration: none;"><i class="fas fa-search fa-lg"></i> Поиск</a>
+            <a href="/procurement/basket" class="btn btn-outline-success mr-5" title="Корзина" style="text-decoration: none;"><i class="fas fa-calculator fa-lg"></i> Закуп</a>
+            <a href="/logout" class="btn btn-outline-dark mr-5" title="Выйти из системы" style="text-decoration: none;"><i class="fas fa-sign-out-alt fa-lg"></i> {{ current_user["first_name"] }} {{ current_user["last_name"] }}</a>
+            {% end %}
+        </div>
+      </nav> <!--<i id="websocket-status" class="fa fa-wifi active"></i>-->
+
+
+
+
+    {% block header %}{% end %}
+    {% module xsrf_form_html() %}
+    {% block body %}{% end %}
+      </div>
+      <!-- <footer class="pl-4 pr-4 pt-2 my-md-2 pt-md-2 border-top">
+        <div class="row">
+          <div class="col-12 col-md">
+            <small class="d-block mb-3 text-muted">&copy; 2017-2018</small>
+          </div>
+          <div class="col-6 col-md">
+            <h5>Features</h5>
+            <ul class="list-unstyled text-small">
+              <li><a class="text-muted" href="#">Cool stuff</a></li>
+              <li><a class="text-muted" href="#">Random feature</a></li>
+            </ul>
+          </div>
+          <div class="col-6 col-md">
+            <h5>Resources</h5>
+            <ul class="list-unstyled text-small">
+              <li><a class="text-muted" href="#">Resource</a></li>
+              <li><a class="text-muted" href="#">Resource name</a></li>
+            </ul>
+          </div>
+          <div class="col-6 col-md">
+            <h5>About</h5>
+            <ul class="list-unstyled text-small">
+              <li><a class="text-muted" href="#">Team</a></li>
+              <li><a class="text-muted" href="#">Locations</a></li>
+            </ul>
+          </div>
+        </div>
+      </footer>-->
+</wrapper>
+    <script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="{{ static_url("js/jquery.stickytableheaders.min.js") }}"></script>
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+    <script src="{{ static_url("bootstrap-4.3.1-dist/js/bootstrap.min.js") }}"></script>
+    <script src="{{ static_url("js/moment.min.js") }}"></script>
+    <script>moment.locale('ru');</script>
+    <script src="{{ static_url("js/toastr.min.js") }}"></script>
+    <link rel="stylesheet" href="{{ static_url("css/contextmenu.css") }}">
+    <script src="{{ static_url("js/contextmenu.js") }}"></script>
+    <script src="{{ static_url("js/jquery.dataTables.min.js") }}"></script>
+    <script src="{{ static_url("js/dataTables.bootstrap4.min.js") }}"></script>
+
+
+    <script src="{{ static_url("js/fixedHeader.bootstrap4.min.js") }}"></script>
+    <script src="{{ static_url("js/fixedHeader.dataTables.js") }}"></script>
+
+    <script src="{{ static_url("js/fixedColumns.bootstrap4.min.js") }}"></script>
+    <script src="{{ static_url("js/fixedColumns.dataTables.js") }}"></script>
+    <script src="{{ static_url("js/dataTables.fixedColumns.min.js") }}"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@8.15.2/dist/sweetalert2.all.min.js"></script>
+
+    <script src="{{ static_url("js/main.js") }}"></script>
+    {% block bottom %}{% end %}
+    <script type="text/javascript">
+      jQuery(document).ready(function() {
+          startWorker();
+
+          if (Notification.permission !== "granted"){
+            $('#notification-warning').show();
+            $('#notification-warning').click(function(){
+                Notification.requestPermission();
+            $('#notification-warning').hide();
+            });
+          }
+      });
+    </script>
+    <script src="{{ static_url('js/autocomplete.js') }}"></script>
+    <script>
+
+        // EMPTY INTERFACE FUNCTION
+        function updateDataTarget() {
+
+        }
+
+      $(document).ready(function(){
+          $('#autocomplete').autocomplete({
+            serviceUrl: '/autocomplete/query/',
+            groupBy: 'category',
+            width: 'flex',
+            onSelect: function (suggestion) {
+                console.log('You selected: ' + suggestion.value + ', ' + suggestion.data);
+                $('#autocomplete').attr('data-product-id', suggestion.data["id"]);
+            }
+        });
+
+          // dummy element
+            var topBar = document.getElementById('top-bar-add-to-cart');
+
+            // check for focus
+            var topBarIsFocused = (document.activeElement === topBar);
+            /*
+            $(document).keypress(function (e) {
+                var key = e.which;
+                    e.preventDefault();
+                    if(key == 13) {
+                        if (topBarIsFocused) {
+                            $('#top-bar-add-to-cart').click();
+                        }
+
+                        else if ($('#cart-add') != 'undefined') {
+                            $('#cart-add').click();
+                        }
+
+                        else {
+                            console.log('boop');
+                        }
+                    }
+            });
+            */
+
+          $('#top-bar-add-to-cart').on('click', function() {
+
+            if ($('#autocomplete').val().trim() != "") {
+
+                var productId = $('#autocomplete').attr('data-product-id');
+
+                $('.large-loading').fadeIn('fast');
+
+                $('#top-bar-add-to-cart').attr('disabled', 'disabled');
+
+                if (productId != 'undefined') {
+
+                    var params = {};
+
+                    params["product_id"] = productId;
+
+                    var request = $.ajax({
+                        url: "/procurement/basket/add_item",
+                        type: "post",
+                        data: params,
+                        dataType: "json",
+
+                        error: function (data) {
+
+                            Swal.fire({
+                              title: 'Ошибка',
+                              text: '',
+                              type: 'warning',
+                              confirmButtonText: 'OK'
+                            });
+
+                            $('#top-bar-add-to-cart').removeAttr('disabled');
+                            $('.large-loading').fadeOut('fast');
+                        },
+
+                        success: function (data) {
+
+                            if (data["message"] == 'OK') {
+                                Swal.fire({
+                                  title: 'Добавлено в корзину',
+                                  text: '',
+                                  type: 'success',
+                                  confirmButtonText: 'OK'
+                                });
+
+                                $('#top-bar-add-to-cart').removeAttr('disabled');
+                                $('.large-loading').fadeOut('fast');
+
+                                updateDataTarget();
+
+                            } else {
+                                Swal.fire({
+                                  title: 'Ошибка',
+                                  text: data["message"],
+                                  type: 'warning',
+                                  confirmButtonText: 'OK'
+                                });
+
+                                $('#top-bar-add-to-cart').removeAttr('disabled');
+                                $('.large-loading').fadeOut('fast');
+
+                            }
+
+                        }
+                    });
+                }
+
+            }
+        });
+
+
+      });
+    </script>
+  </body>
+</html>

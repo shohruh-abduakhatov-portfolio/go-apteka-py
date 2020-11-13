@@ -1,0 +1,130 @@
+{% extends "../base.html" %}
+{% block header %}
+
+{% end %}
+{% block body %}
+
+<div class="container">
+    <div class="shadow p-4 mb-4 bg-white">
+        <div class="relative">
+            <div class="px-3 pb-md-4 mx-auto text-center">
+                <p class="site-header">Редактирование <strong><a href="/agents/{{ agent["agent_id"] }}/view/">{{ agent["company_name"] }}</a></strong></p>
+            </div>
+            <form id="create-user-form" action="/agents/{{ agent["agent_id"] }}/edit/" method="POST">
+                <div class="row">
+                    <div class="col-sm">
+                        <div class="form-group">
+                            <label for="exampleInputEmail1"><strong>Название организации <i class="required">*</i></strong></label>
+                            <input type="text" name="company_name" required class="form-control" aria-describedby="emailHelp" placeholder="Введите название" value="{{ agent["company_name"] }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputEmail1"><strong>Юридический адрес <i class="required">*</i></strong></label>
+                            <input type="text" name="address" required class="form-control" aria-describedby="emailHelp" placeholder="Введите адрес" value="{{ agent["address"] }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputEmail1"><strong>ИНН <i class="required">*</i></strong></label>
+                            <input type="text" name="inn" required class="form-control" aria-describedby="emailHelp" placeholder="Введите ИНН" value="{{ agent["inn"] }}">
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputEmail1"><strong>МФО <i class="required">*</i></strong></label>
+                            <input type="text" name="mfo" class="form-control" aria-describedby="emailHelp" placeholder="Введите МФО" value="{{ agent["mfo"] }}">  
+                        </div>
+                        <hr>
+                        <div class="form-group">
+                            <div class="form-check form-check-inline">
+                                <input name="is_manufacturer" class="form-check-input manufacturer-check" type="checkbox"
+                                {% if agent["is_manufacturer"] == 1 %} checked {% end %}
+                                id="inlineCheckbox1" value="1">
+                                <label class="form-check-label" for="inlineCheckbox1">Агент является производителем</label>
+                            </div>
+                            <div class="alert alert-danger" role="alert">
+                                Выберите эту опцию только если данный агент продает товар собственного производства!
+                            </div>
+
+                            <input type="text" id="search-manufacturer" {% if agent["is_manufacturer"] == 0 %}class="hidden"{% end %}>
+                            <br>
+                            <strong id="selected-manufacturer">{% if "manufacturer" in agent and agent["manufacturer_id"] > 0 %}{{ agent["manufacturer"] }}{% end %}</strong>
+                            <input type="hidden" id="manufacturer-id" name="manufacturer_id" value="{% if "manufacturer_id" in agent and agent["manufacturer_id"] != None and agent["manufacturer_id"] > 0  %}{{ agent["manufacturer_id"] }}{% else %}0{% end %}">
+                        </div>
+                    </div>
+                    <div class="col-sm">
+                        <div>
+                            <p><strong>Выберите роль:</strong></p>
+                            <div class="form-check form-check-inline">
+                                <input name="buyer" class="form-check-input" type="checkbox" 
+                                {% if agent["buyer"] == 1 %} checked {% end %}
+                                id="inlineCheckbox1" value="1">
+                                <label class="form-check-label" for="inlineCheckbox1">Покупатель</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input name="supplier" class="form-check-input" type="checkbox" 
+                                {% if agent["supplier"] == 1 %} checked {% end %}
+                                id="inlineCheckbox2" value="1">
+                                <label class="form-check-label" for="inlineCheckbox2">Продавец</label>
+                            </div>
+                            <hr/>
+                            <p><strong>Выберите районы в которых работает пользователь:</strong></p>
+                            <div class="locations ml-4">
+                                {% for k,v in locations.items() %}
+                                <div class="location">
+                                    <div class="form-group mb-0">
+                                        <input class="form-check-input main-checkbox" id="check-main-{{ k }}" value="{{ k }}" type="checkbox">
+                                        <label class="form-check-label" for="check-main-{{ k }}"><strong>{{ v["name"] }}</strong></label>
+                                    </div>
+                                    <ul class="pl-3 pt-1 mt-0">
+                                    {% for k1,v1 in v["districts"].items() %}
+                                        <li>
+                                            <input class="form-check-input children-checkbox" name="district"
+                                                   {% if "list_working_locations" in agent and agent["list_working_locations"] != None and int(k1) in agent["list_working_locations"] %} 
+                                                   checked
+                                                   {% end %}
+                                                   type="checkbox" value="{{ k1 }}" id="check-{{ k1 }}">
+                                            <label class="form-check-label" for="check-{{ k1 }}">{{ v1 }}</label>
+                                        </li>
+                                    {% end %}
+                                    </ul>
+                                </div>
+                                {% end %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr/>
+                <div class="form-group">
+                    <label for="exampleInputEmail1"><strong>Периодичность прайсов <i class="required">*</i></strong></label>
+                    <input type="number" name="frequency" style="width: 100px;" required class="form-control" aria-describedby="emailHelp" placeholder=""  value="{{ agent["frequency"] }}">
+                </div>
+                <hr/>
+                {% module xsrf_form_html() %}
+                <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% end %}
+
+{% block bottom %}
+<script>
+      $(document).ready(function(){
+          $('.manufacturer-check').change(function(){
+              console.log($(this)[0].checked);
+              if ($(this)[0].checked) {
+                   $('#search-manufacturer').show();
+              } else {
+                   $('#search-manufacturer').hide();
+              }
+          });
+          $('#search-manufacturer').autocomplete({
+            serviceUrl: '/manufacturer/autocomplete/query/',
+            groupBy: 'category',
+            width: 'flex',
+            onSelect: function (suggestion) {
+                $('#selected-manufacturer').html(suggestion.value);
+                $('#manufacturer-id').val(suggestion.data["id"]);
+                console.log('You selected: ' + suggestion.value + ', ' + suggestion.data);
+            }
+        });
+      });
+</script>
+{% end %}

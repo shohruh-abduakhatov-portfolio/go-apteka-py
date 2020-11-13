@@ -1,0 +1,132 @@
+{% extends "../base.html" %}
+{% block header %}
+
+{% end %}
+{% block body %}
+{% if agent is not None %}
+<div class="container">
+<div class="shadow p-4 mb-4 bg-white">
+    <div class="x-3 pb-md-4 mx-auto">
+        <h3 class="display-5 agent-header">
+            {{ agent["company_name"] }}
+            <div>
+            <a href="/agents/{{ agent["agent_id"] }}/edit/" class="btn btn-warning">
+                <i class="fa fa-edit"></i> Редактировать
+            </a>
+            </div>
+        </h3>
+        <hr>
+
+        <p>Последний прайс был загружен: <strong>
+        {% if last_price is not None%}
+        {{ last_price["created_at"] }}
+        {% else %}
+        Никогда
+        {% end %}
+        </strong></p>
+        <a href="/agents/{{ agent["agent_id"] }}/upload/" class="btn btn-danger">
+            <i class="fas fa-cloud-upload-alt"></i> Загрузить прайс
+        </a>
+
+        <p class="mt-2">Периодичность: <strong>{{ agent["frequency"] }}</strong></p>
+        <hr>
+        {% if agent["is_manufacturer"] == 1 %}
+        <div class="agent-info"><i class="fa fa-industry"></i> <span class="text-secondary">Производитель</span>
+        <a href="/products/manufacturers/{{ agent["manufacturer_id"] }}/view/"><strong>{% if "manufacturer" in agent %}{{ agent["manufacturer"] }}{% end %}</strong></a>
+        </div>
+        {% end %}
+        <hr>
+        <div class="agent-info"><span class="text-secondary">Адрес:</span> <strong>{{ agent["address"] }}</strong></div>
+        <div class="agent-info"><span class="text-secondary">Рейтинг:</span> <strong class="text-success">{{ agent["rating"] }}</strong></div>
+        <div class="agent-info"><span class="text-secondary">ИНН:</span> <strong>{{ agent["inn"] }}</strong></div>
+        <div class="agent-info"><span class="text-secondary">МФО:</span> <strong>{{ agent["mfo"] }}</strong></div>
+        {% if agent["telegram_id"] != None %}
+        <div class="agent-info"><span class="text-secondary">Телеграм ID:</span> <strong>{{ agent["telegram_id"] }}</strong></div>
+        {% end %}
+        <div>
+    </div>
+</div>
+
+<div class="tabbable">
+    <ul class="nav nav-tabs">
+        <li class="nav-item">
+            <a class="nav-link {% if request.uri == "/agents/" + str(agent["agent_id"]) + "/view/" %} active {% end %}" href="{{ "/agents/" + str(agent["agent_id"]) + "/view/" }}">
+            Пользователи <span class="badge badge-secondary badge-danger">1</span>
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if request.uri == "/products/" %} active {% end %}" href="/products/">
+            Сделки
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {% if request.uri == "/products/aliases/" %} active {% end %}" href="/products/aliases/">
+            Платежи
+            </a>
+        </li>
+    </ul>
+</div>
+<div class="bg-white pl-1 pr-1 pt-4 pl-lg-4 pb-3 pr-lg-4 border-left border-right border-bottom">
+  <h3 class="pb-1 agent-header">Список пользователей агента <a href="/agents/{{ agent["agent_id"] }}/users/add/" class="btn btn-primary"><i class="fa fa-plus"></i> Добавить пользователя</a></h3>
+  <p class="pb-2 text-secondary">Тут будет какое-то пояснение</p>
+  <table id="agent_users" class="table table-striped table-bordered tasks-table" style="width:100%">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Имя</th>
+            <th>Логин</th>
+            <th>Почта</th>
+            <th>Телефон</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+    <tfoot>
+        <tr>
+            <th>ID</th>
+            <th>Имя</th>
+            <th>Логин</th>
+            <th>Почта</th>
+            <th>Телефон</th>
+        </tr>
+    </tfoot>
+</table>
+</div>
+</div>
+
+</div>
+{% else %}
+<h1 style="text-align:center;">Поставщик не найден</h1>
+{% end %}
+{% end %}
+
+{% block bottom %}
+{% if agent is not None %}
+<script>
+    $(document).ready(function() {
+        $('#agent_users').DataTable({
+          oLanguage: {
+            "sUrl": "https://cdn.datatables.net/plug-ins/1.10.19/i18n/Russian.json"
+          },
+          responsive: true,
+          serverSide: true,
+          createdRow: function( row, data, dataIndex ) {
+              var d = data[0];
+              $(row).attr('data-id', d);
+          },
+          ajax: '/agents/{{ agent["agent_id"] }}/users/data.json'
+    } );
+    $('#agent_users tbody').on( 'click', 'tr', function () {
+        var key = $(this).attr('data-id');
+        document.location = "//" + window.location.host + "/agents/{{ agent["agent_id"] }}/users/" + key + "/view/";
+    } );
+    });
+
+    function areSameDate(d1, d2) {
+    return d1.getFullYear() == d2.getFullYear()
+        && d1.getMonth() == d2.getMonth()
+        && d1.getDate() == d2.getDate();
+}
+</script>
+{% end %}
+{% end %}

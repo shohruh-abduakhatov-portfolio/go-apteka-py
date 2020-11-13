@@ -1,0 +1,96 @@
+{% extends "../base.html" %}
+{% block header %}
+
+{% end %}
+{% block body %}
+
+<div class="container">
+    <div class="shadow p-4 mb-4 bg-white">
+        <div class="relative">
+            <div class="px-3 pb-md-4 mx-auto text-center">
+                <p class="site-header">Создание компании</p>
+            </div>
+            <form id="create-user-form" action="/agents/register/" method="POST">
+                <div class="row">
+                    <div class="col-sm">
+                        <div class="form-group">
+                            <label for="exampleInputEmail1"><strong>Название организации <i class="required">*</i></strong></label>
+                            <input type="text" name="company_name" required class="form-control" aria-describedby="emailHelp" placeholder="Введите название" >
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputEmail1"><strong>Юридический адрес <i class="required">*</i></strong></label>
+                            <input type="text" name="address" required class="form-control" aria-describedby="emailHelp" placeholder="Введите адрес" >
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputEmail1"><strong>ИНН <i class="required">*</i></strong></label>
+                            <input type="text" name="inn" required class="form-control" aria-describedby="emailHelp" placeholder="Введите ИНН" >
+                        </div>
+                        <div class="form-group">
+                            <label for="exampleInputEmail1"><strong>МФО <i class="required">*</i></strong></label>
+                            <input type="text" name="mfo" class="form-control" aria-describedby="emailHelp" placeholder="Введите МФО" >  
+                        </div>
+                        <hr>
+                        <div class="form-group">
+                            <div class="form-check form-check-inline">
+                                <input name="is_manufacturer" class="form-check-input" type="checkbox" 
+                                
+                                id="inlineCheckbox1" value="1">
+                                <label class="form-check-label" for="inlineCheckbox1">Агент является производителем</label>
+                            </div>
+                            <div class="alert alert-danger" role="alert">
+                                Выберите эту опцию только если данный агент продает товар собственного производства!
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm">
+                        <div>
+                            <p><strong>Выберите роль:</strong></p>
+                            <div class="form-check form-check-inline">
+                                <input name="buyer" class="form-check-input" type="checkbox" 
+                               
+                                id="inlineCheckbox1" value="1">
+                                <label class="form-check-label" for="inlineCheckbox1">Покупатель</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input name="supplier" class="form-check-input" type="checkbox" 
+                                
+                                id="inlineCheckbox2" value="1">
+                                <label class="form-check-label" for="inlineCheckbox2">Продавец</label>
+                            </div>
+                            <hr/>
+                            <p><strong>Выберите районы в которых работает пользователь:</strong></p>
+                            <div class="locations ml-4">
+                                {% for k,v in locations.items() %}
+                                <div class="location">
+                                    <div class="form-group mb-0">
+                                        <input class="form-check-input main-checkbox" id="check-main-{{ k }}" value="{{ k }}" type="checkbox">
+                                        <label class="form-check-label" for="check-main-{{ k }}"><strong>{{ v["name"] }}</strong></label>
+                                    </div>
+                                    <ul class="pl-3 pt-1 mt-0">
+                                    {% for k1,v1 in v["districts"].items() %}
+                                        <li>
+                                            <input class="form-check-input children-checkbox" name="district"
+                                                  
+                                                   type="checkbox" value="{{ k1 }}" id="check-{{ k1 }}">
+                                            <label class="form-check-label" for="check-{{ k1 }}">{{ v1 }}</label>
+                                        </li>
+                                    {% end %}
+                                    </ul>
+                                </div>
+                                {% end %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <hr/>
+                {% module xsrf_form_html() %}
+                <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% end %}
+
+{% block bottom %}
+{% end %}

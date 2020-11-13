@@ -1,0 +1,43 @@
+{% extends "../base.html" %}
+{% block headline %} Продукты {% end %}
+{% block head %}
+
+{% end %}
+{% block body %}
+<div class="container">
+    <h3>Продукты:</h3>
+    <div class="tabbable">
+        <ul class="nav nav-tabs">
+            <li class="nav-item">
+                <a class="nav-link {% if request.uri == "/products/tasks/" %} active {% end %}" href="/products/tasks/">
+                Проблемные: <span class="badge badge-secondary badge-danger">1</span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.uri == "/products/" %} active {% end %}" href="/products/">
+                Продукты
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.uri == "/products/aliases/" %} active {% end %}" href="/products/aliases/">
+                Синонимы товаров
+                </a>
+            </li>
+             <li class="nav-item">
+                <a class="nav-link {% if request.uri == "/products/manufacturers/" %} active {% end %}" href="/products/manufacturers/">
+                Производители
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link {% if request.uri == "/products/manufacturers/aliases/" %} active {% end %}" href="/products/manufacturers/aliases/">
+                Синонимы производителей
+                </a>
+            </li>
+        </ul>
+    </div>
+    <div class="bg-white pl-1 pr-1 pt-4 pl-lg-4 pb-3 pr-lg-4 border-left border-right border-bottom">
+        {% block content %}
+        {% end %}
+    </div>
+</div>
+{% end %}

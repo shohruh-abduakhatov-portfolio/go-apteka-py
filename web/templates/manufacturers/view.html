@@ -1,0 +1,195 @@
+{% extends "../base.html" %}
+{% block header %}
+<style>
+td, .table td {
+    vertical-align: middle;
+    padding: 0 12px;
+}
+td strong {
+    color: #007bff;
+}
+</style>
+{% end %}
+{% block body %}
+<div class="container">
+  <h5 class="mb-2 text-uppercase">
+    <a href="/products/manufacturers/"><i class="fa fa-arrow-left pr-2"></i>Производители</a>
+  </h5>
+<div class="shadow p-4 mb-4 bg-white">
+    <div class="x-3 pb-md-4 mx-auto">
+        <h3 class="display-5 agent-header">{{ manufacturer["name"] }}</h3>
+       
+    <div class="agent-info">
+      <span class="text-secondary">Страна:</span>
+      {% if "country" in manufacturer %}
+      <strong>{{ manufacturer["country"] }}</strong>
+      {% else %}
+      <i class="fa fa-warning text-danger"></i> Неизвестно
+      {% end %}
+    </div>
+    
+    <hr>
+    <h5 class="display-6 text-center">Алиасы</h5>
+   {% if len(aliases) > 0 %}
+   <table border="1" class="table table-striped table-bordered text-left">
+        <tbody>
+            {% for alias in aliases %}
+            <tr>
+                <td>{{ alias["alias"] }}</td>
+                <td>Добавил: {{ alias["agent_id"] }}</td>
+                <td><button class="btn btn-danger delete-alias" data-alias-id="{{ alias["alias_id"] }}">Удалить</button></td>
+            </tr>
+            {% end %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="text-center">
+      <span class="text-secondary">Данные отсутствуют</span>
+    </div>
+    {% end %}
+
+    <hr>
+    <table id="example" class="table table-striped table-bordered tasks-table" style="width:100%">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Товар</th>
+            <th>Производитель</th>
+            <th>Файл</th>
+            <th>Дата</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+    <tfoot>
+        <tr>
+            <th>ID</th>
+            <th>Товар</th>
+            <th>Производитель</th>
+            <th>Файл</th>
+            <th>Дата</th>
+        </tr>
+    </tfoot>
+</table>
+
+<hr>
+    <h3>Заменить производителя</h3>
+    <div class="alert alert-danger" role="alert">
+    Если данный производитель является дубликатом другого производителя вы можете заменить его на выбранного производеля. Товары и альясы будут перенесены.
+    <hr>
+    Внимание! Данное действие необратимо!
+    </div>
+    <select style="height:38px;" id="new_manufacturer">
+    {% for k, m in manufacturers.items() %}
+        {% if m["manufacturer_id"] != manufacturer["manufacturer_id"] %}
+            <option value="{{ m["manufacturer_id"] }}"> {{ m['name'] }}</option>
+        {% end %}
+    {% end %}
+    </select>
+    <button id="move-products" class="btn btn-primary">Заменить производителя</button>
+    
+</div>
+</div>
+</div>
+{% end %}
+
+{% block bottom %}
+<script>
+    $(document).ready(function() {
+
+        var token = Cookies.get('_xsrf');
+        $.ajaxSetup({
+            headers: {
+                'X-XSRFToken': token
+            }
+        });
+
+        $('.delete-alias').click(function(data) {
+            var row = $(this).closest("tr");
+            var aliasId = $(this).attr("data-alias-id");
+            console.log(aliasId);
+            var r = confirm("Вы действительно хотите удалить альяс?");
+            if (r == true) {
+                $(this).attr('disabled', "disabled");
+                var request = $.ajax({
+                    url: "/products/aliases/" + aliasId + "/remove/",
+                    type: "post",
+                    dataType: "json",
+                    error: function (data) {
+                        alert("error");
+                    },
+                    success: function (data) {
+                        row.remove();
+                    }
+                });
+            }
+        });
+
+        $('#move-products').click(function(){
+            var confirmation = confirm("Вы действительно хотите заменить производителя?");
+            if(confirmation == true) {
+                $(this).attr('disabled', "disabled");
+                var new_mid = $('#new_manufacturer').val();
+                    var request = $.ajax({
+                    url: "/products/manufacturers/{{ manufacturer["manufacturer_id"] }}/move_products/",
+                    type: "post",
+                    data: { "new_mid": new_mid},
+                    dataType: "json",
+                    error: function (data) {
+                        alert("error");
+                        $('#second-progress').hide();
+                        $('#first-filter').show();
+                    },
+                    success: function (data) {
+                        document.location = "//" + window.location.host + "/products/manufacturers/";
+                    }
+                }); 
+            }
+            
+
+        });
+
+        $('#example').DataTable({
+        oLanguage: {
+          "sUrl": "https://cdn.datatables.net/plug-ins/1.10.19/i18n/Russian.json"
+        },
+        responsive: true,
+        serverSide: true,
+        createdRow: function( row, data, dataIndex ) {
+            var d = data[0];
+            $(row).attr('data-id', d);
+        },
+        ajax: '/products/filter/data.json?manufacturer={{ manufacturer["manufacturer_id"] }}',
+        "columnDefs": [
+            {"render": function ( data, type, row ) {
+                var d = moment(data, 'hh:mm DD.MM.YYYY').toDate();
+                if (areSameDate(d, new Date())) {
+                    return moment(d).format('hh:mm');
+                } else {
+                    var now = moment(new Date());
+                    var end = d; 
+                    var duration = moment.duration(now.diff(end));
+                    var days = duration.asDays();
+                    if (days < 2) {
+                        return moment(d).calendar();
+                    }
+                }
+                return data; 
+            },"targets": 4},
+            {"render": function ( data, type, row ) {
+                return "<strong>" + data + "</strong>";
+            },"targets": 1},
+        ]});
+    $('#example tbody').on( 'click', 'tr', function () {
+        var key = $(this).attr('data-id');
+        document.location = "//" + window.location.host + "/products/" + key + "/view/";
+    } );
+    } );
+
+    function areSameDate(d1, d2) {
+    return d1.getFullYear() == d2.getFullYear()
+        && d1.getMonth() == d2.getMonth()
+        && d1.getDate() == d2.getDate();
+}
+</script>
+{% end %}

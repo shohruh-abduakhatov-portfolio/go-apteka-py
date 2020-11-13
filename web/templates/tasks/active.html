@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+
+{% block head %}
+<style>
+.dataTables_length {
+    display:none;
+}
+</style>
+{% end %}
+{% block content %}
+<table id="example" class="table table-striped table-bordered " style="width:100%">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Поставщик</th>
+            <th>Кол-во товара</th>
+            <th>Дата</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+</table>
+
+{% end %}
+
+{% block bottom %}
+<script>
+    $(document).ready(function() {
+        var table = $('#example').DataTable({
+        searching: false,
+        "ordering": false,
+        responsive: true,
+        serverSide: true,
+        "processing": true,
+        "scrollY": "40vh",
+        "language": {
+            processing: '<div class="spinner"> <div class="rect1"></div> <div class="rect2"></div> <div class="rect3"></div> <div class="rect4"></div> <div class="rect5"></div> </div>'
+        },
+        ajax: '/pricelist/active/data.json',
+        'createdRow': function( row, data, dataIndex ) {
+            $(row).attr('data-id', data[4]);
+        },
+         
+        "columnDefs": [
+        {"render": function ( data, type, row ) {
+                return '<nobr><a href="/orders/' + row[0] + '/view/" target="_blank"></i>' + data + '<i class="fas fa-external-link-alt pl-2 text-secondary" aria-hidden="true"></a></nobr>';
+            },"targets": 0},
+        {"render": function ( data, type, row ) {
+                return '<a href="/agents/' + row[5] + '/view/" target="_blank"></i>' + data + '<i class="fas fa-external-link-alt pl-2 text-secondary" aria-hidden="true"></a>';
+            },"targets": 1},
+            {"render": function ( data, type, row ) {
+                var d = moment(data, 'hh:mm DD.MM.YYYY').toDate();
+                if (areSameDate(d, new Date())) {
+                    return "Сегодня в " + moment(d).format('hh:mm');
+                } else {
+                    var now = moment(new Date());
+                    var end = d; 
+                    var duration = moment.duration(now.diff(end));
+                    var days = duration.asDays();
+                    if (days < 2) {
+                        return moment(d).calendar();
+                    }
+                }
+                return data; 
+            },"targets": 3},
+
+            { "visible": false,  "targets": [ 4,5 ] },
+        ]});
+    });
+
+    function areSameDate(d1, d2) {
+    return d1.getFullYear() == d2.getFullYear()
+        && d1.getMonth() == d2.getMonth()
+        && d1.getDate() == d2.getDate();
+}
+</script>
+{% end %}

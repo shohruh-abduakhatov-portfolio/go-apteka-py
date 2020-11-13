@@ -1,0 +1,182 @@
+{% extends "../../base.html" %}
+{% block header %}
+
+{% end %}
+{% block body %}
+<div class="container">
+<div class="shadow p-4 mb-4 bg-white">
+
+<div class="relative">
+<div class="px-3 pb-md-4 mx-auto text-center">
+    <p class="site-header">Редактирование пользователя <strong><a href="/agents/{{ agent["agent_id"] }}/users/{{ user["user_id"] }}/view/">{{ user["first_name"] }}</a></strong></p>
+</div>
+<form id="create-user-form" action="/agents/{{ agent["agent_id"] }}/users/{{ user["user_id"] }}/edit/" method="POST">
+    <div class="row">
+        <div class="col-sm">
+            <div class="form-group">
+                <label for="exampleInputEmail1"><strong>Имя <i class="required">*</i></strong></label>
+                <input type="text" name="first_name" required class="form-control" aria-describedby="emailHelp" placeholder="Введите имя" value="{{ user["first_name"] }}">
+                
+            </div>
+            <div class="form-group">
+                <label for="exampleInputEmail1"><strong>Фамилия <i class="required">*</i></strong></label>
+                <input type="text" name="last_name" required class="form-control" aria-describedby="emailHelp" placeholder="Введите фамилию" {% if "last_name" in user %} value="{{ user["last_name"] }}" {% end %}>
+            </div>
+            <div class="form-group">
+                <label for="exampleInputEmail1"><strong>Логин <i class="required">*</i></strong></label>
+                <input type="text" name="username" required class="form-control" aria-describedby="emailHelp" placeholder="Введите логин" value="{{ user["username"] }}">
+            </div>
+            <div class="form-group">
+                <label for="exampleInputPassword1"><strong>Пароль</strong></label>
+                <input type="text" name="password" readonly class="form-control" value="{{ user["password"] }}">
+            </div>
+            <div class="form-group">
+                <label for="exampleInputEmail1">Почта</label>
+                <input type="email" name="email" class="form-control" aria-describedby="emailHelp" placeholder="Введите почту" value="{% if "email" in user %}{{ user["email"] }} {% end %}">  
+            </div>
+        </div>
+        <div class="col-sm">
+            <div>
+                <p><strong>Выберите роль:</strong></p>
+                {% if agent["buyer"] == 1 %}
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="inlineCheckbox1" value="option1">
+                    <label class="form-check-label" name="buyer" for="inlineCheckbox1">Покупатель</label>
+                </div>
+                {% end %}
+                {% if agent["supplier"] == 1 %}
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="checkbox" id="inlineCheckbox2" value="option2">
+                    <label class="form-check-label" name="supplier" for="inlineCheckbox2">Продавец</label>
+                </div>
+                {% end %}
+                <hr/>
+                <p><strong>Выберите районы в которых работает пользователь:</strong></p>
+                <div class="locations ml-4">
+                    {% for k,v in locations.items() %}
+                    <div class="location">
+                        <div class="form-group mb-0">
+                            <input class="form-check-input main-checkbox" id="check-main-{{ k }}" value="{{ k }}" type="checkbox">
+                            <label class="form-check-label" for="check-main-{{ k }}"><strong>{{ v["name"] }}</strong></label>
+                        </div>
+                        <ul class="pl-3 pt-1 mt-0">
+                        {% for k1,v1 in v["districts"].items() %}
+                            {% if "list_working_locations" in agent and int(k1) in agent["list_working_locations"] %}
+                            <li>
+                                <input class="form-check-input children-checkbox" name="district" type="checkbox" value="{{ k1 }}" id="check-{{ k1 }}">
+                                <label class="form-check-label" for="check-{{ k1 }}">{{ v1 }}</label>
+                            </li>
+                            {% end %}
+                        {% end %}
+                        </ul>
+                    </div>
+                    {% end %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr/>
+    {% module xsrf_form_html() %}
+    <button type="submit" class="btn btn-primary">Сохранить изменения</button>
+</form>
+    <div class="large-loading text-center">
+        <div id="action-processing" class="hidden">
+            <div class="spinner"> 
+                <div class="rect1"></div> 
+                <div class="rect2"></div> 
+                <div class="rect3"></div> 
+                <div class="rect4"></div> 
+                <div class="rect5"></div> 
+            </div>
+            <p>Сохраняем изменения...</p>
+        </div>
+        <div id="action-complete" style="max-width: 400px;" class="mx-auto mt-6 hidden">
+            <div class="alert alert-success" role="alert">
+                <h4 class="alert-heading">Пользователь успешно изменен!</h4>
+                <p>Данные успешно изменены</p>
+                <hr>
+                <p class="mb-0"><a href="/agents/{{ agent["agent_id"] }}/users/{{ user["user_id"] }}/view/" class="btn btn-primary">Закрыть</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+</div>
+{% end %}
+
+{% block bottom %}
+<script>
+$(document).ready(function(){
+
+    $("#create-user-form").submit(function(e) {
+
+$('.large-loading').show();
+$('#action-processing').show();
+    var form = $(this);
+    var url = form.attr('action');
+
+    $.ajax({
+        type: "POST",
+        url: url,
+        data: form.serialize(), 
+        success: function(data)
+        {
+            $('#action-processing').hide();
+            $('#action-complete').show();
+            $('.large-loading').show();
+        }, error:function(data) {
+            $('.large-loading').hide();
+            $('#action-processing').hide();
+            $('#action-complete').hide();
+        }
+    });
+
+    e.preventDefault();
+});
+
+    $('.main-checkbox').click(function(){
+        var l = $(this).closest('.location');
+        l.find('.children-checkbox').prop("checked", $(this).prop("checked"));
+    });
+    $('.children-checkbox').click(function(){
+        var main = $(this).closest('.location').find('.main-checkbox');
+        var selectAllChecked = main.prop("checked");
+        if (selectAllChecked && $(this).prop("checked") == false) {
+            main.prop("checked", false);
+        } else {
+            var allChecked = true;
+            var l = $(this).closest('.location');
+            var ch = l.find('.children-checkbox');
+            ch.each(function () {
+                allChecked = $(this).prop("checked");
+                if (!allChecked) {
+                    return false;
+                }
+            });
+           main.prop("checked", allChecked);
+        } 
+    });
+});
+
+function client_onclick() {
+    var selectAllChecked = $("#chk-clients-all").prop("checked");
+
+    if (selectAllChecked && $(this).prop("checked") == false) {
+        $("#chk-clients-all").prop("checked", false);
+    } else {
+        var allChecked = true;
+        $(".client").each(function () {
+            allChecked = $(this).prop("checked");
+            if (!allChecked) {
+                return false;
+            }
+        });
+        $("#chk-clients-all").prop("checked", allChecked);
+    }
+}
+
+function client_all_onclick() {
+    $(".client").prop("checked", $(this).prop("checked"));
+}
+</script>
+{% end %}

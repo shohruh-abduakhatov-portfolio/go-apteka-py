@@ -1,0 +1,26 @@
+{% extends "../base.html" %}
+{% block header %}
+
+{% end %}
+{% block body %}
+<div class="px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
+    <h1 class="display-4">автокомплит</h1>
+    <p class="lead">
+    <input type="text" id="autocomplete">
+    </p>
+</div>
+{% end %}
+
+{% block bottom %}
+<script src="{{ static_url("js/autocomplete.js") }}"></script>
+
+<script>
+$('#autocomplete').autocomplete({
+    serviceUrl: '/autocomplete/query/',
+    groupBy: 'category',
+    width: 'flex',
+    onSelect: function (suggestion) {
+        alert('You selected: ' + suggestion.value + ', ' + suggestion.data);
+    }
+});</script>
+{% end %}

@@ -1,0 +1,13 @@
+[Unit]
+Description=Pharmex Client
+After=multi-user.target
+
+[Service]
+Type=idle
+Environment="PRODUCTION=1"
+ExecStart=/bin/sh /var/www/pharmex_client/autostart.sh
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

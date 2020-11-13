@@ -1,0 +1,10 @@
+[submodule "modules/kinetic_core"]
+	path = modules/kinetic_core
+	url = git@bitbucket.org:mmdost/kinetic-core.git
+	branch = master
+[submodule "modules/business"]
+	path = modules/business
+	url = git@bitbucket.org:mmdost/business.git
+[submodule "modules/pharmex"]
+	path = modules/pharmex
+	url = git@bitbucket.org:shohruh_abduakhatov/pharmex.git

@@ -1,0 +1,66 @@
+{% extends "../base.html" %}
+{% block header %}
+
+{% end %}
+{% block body %}
+<div class="container">
+<div class="shadow p-4 mb-4 bg-white">
+    <div class="x-3 pb-md-4 mx-auto">
+        <h3 class="display-5 agent-header">
+            <a href="/products/{{ price["product_id"] }}/view/">{{ price["name"] }}</a>
+        </h3>
+        <h4>{{ price["manufacturer"] }}</h4>
+        <hr>
+        <div class="row">
+            <div class="col-sm">
+                {% if price["wire25"] != None %}
+                <div class="agent-info">
+                    <span class="text-secondary">Цена 25%:</span> 
+                    <strong>{{ price["wire25"] }}</strong>
+                </div>
+                {% end %}
+                {% if price["wire50"] != None %}
+                <div class="agent-info">
+                    <span class="text-secondary">Цена 50%:</span> 
+                    <strong>{{ price["wire50"] }}</strong>
+                </div>
+                {% end %}
+                {% if price["wire75"] != None %}
+                <div class="agent-info">
+                    <span class="text-secondary">Цена 75%:</span> 
+                    <strong>{{ price["wire75"] }}</strong>
+                </div>
+                {% end %}
+                {% if price["wire100"] != None %}
+                <div class="agent-info">
+                    <span class="text-secondary">Цена 100%:</span> 
+                    <strong>{{ price["wire100"] }}</strong>
+                </div>
+                {% end %}
+                {% if price["cash"] != None %}
+                <div class="agent-info">
+                    <span class="text-secondary">Цена нал:</span> 
+                    <strong>{{ price["cash"] }}</strong>
+                </div>
+            {% end %}
+            </div>
+            <div class="col-sm">
+                <div class="agent-info">
+                    <span class="text-secondary">В наличии:</span> 
+                    <strong>{{ price["quantity"] }}</strong>
+                </div>
+                <div class="agent-info">
+                    <span class="text-secondary">Срок годности:</span> 
+                    <strong>{{ price["expiry"] }}</strong>
+                </div>
+            </div>
+        </div>
+    <hr>
+    {{ price }}
+</div>
+</div>
+</div>
+{% end %}
+
+{% block bottom %}
+{% end %}

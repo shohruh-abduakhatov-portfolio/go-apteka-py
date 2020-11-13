@@ -1,0 +1,2235 @@
+{% extends "../base.html" %}
+
+{% block headline %} Формирование закупа {% end %}
+{% block header %}
+
+<style>
+
+    #matrix-table {
+
+        width: 100%;
+        /*table-layout: fixed;*/
+        /*word-wrap:break-word;*/
+    }
+
+    #matrix-table p {
+        font-size: 0.92em;
+    }
+
+    #matrix-table thead {
+        white-space: nowrap;
+    }
+
+    #matrix-table thead th {
+        writing-mode: sideways-lr;
+
+        /*
+        writing-mode: vertical-lr;
+        -moz-transform: scale(-1, -1);
+        -webkit-transform: scale(-1, -1);
+        -o-transform: scale(-1, -1);
+        -ms-transform: scale(-1, -1);
+        transform: scale(-1, -1);
+        */
+    }
+
+    .dataTables_scrollFoot th{
+        writing-mode: sideways-lr;
+
+        /*
+        writing-mode: vertical-lr;
+        -moz-transform: scale(-1, -1);
+        -webkit-transform: scale(-1, -1);
+        -o-transform: scale(-1, -1);
+        -ms-transform: scale(-1, -1);
+        transform: scale(-1, -1);
+        */
+    }
+
+    .included-in-list {
+        /*
+        -moz-transform: scale(-1, -1);
+        -webkit-transform: scale(-1, -1);
+        -o-transform: scale(-1, -1);
+        -ms-transform: scale(-1, -1);
+        transform: scale(-1, -1);
+        */
+    }
+
+    .basket-controls {
+        margin-left: 1em;
+        margin-right: 1em;
+    }
+
+    .matrix-quantity {
+        width: 4em;
+        margin-left: 1em;
+        text-align: center;
+    }
+
+    .min-sup-cost-input {
+        width: 80%;
+    }
+
+
+    .modal-dialog {
+        width: 80%;
+    }
+
+    .del-pref-button {
+        max-width: 40px;
+    }
+
+</style>
+
+{% end %}
+
+{% block body %}
+
+
+    <div class="shadow p-4 mb-4 bg-white">
+    <!--<h3 class="agent-header" style="font-weight:300;"><span> Формирование закупа </span>-->
+    <h2 class="text-center" style="font-weight:300;"><span> Формирование закупа </span>
+
+    <!--<a href="#" id="create-procurement-mivs" class="btn btn-success"><i class="fas fa-plus-circle"></i> Подтвердить </a>-->
+
+    </h2>
+    <hr>
+
+    <div class="row">
+
+        <!--
+        <div class="mb-3 col-sm-4">
+            <p style="line-height: 38px; margin-bottom: 0; font-size: 20px; font-weight: 300; margin-right: 20px;display:inline-block;">Выберите тип:</p>
+            <select id="procurement_type" style="height:38px;" name="procurement_type">
+                <option value="standard">Стандартная</option>
+                <option value="urgent">Срочная</option>
+            </select>
+            <div>
+                <label><input type="checkbox" class="pharmacy-only" value="1" onchange="getPharmacyOnly(this)"> Только аптеки</label>
+                <label><input type="checkbox" class="urgent-only" value="1" onchange="getUrgentOnly(this)"> Только срочные</label>
+            </div>
+        </div>
+        -->
+        <!--
+        <div class="mb-3 col-sm-4">
+            <p style="line-height: 38px; margin-bottom: 0; font-size: 20px; font-weight: 300; margin-right: 20px;display:inline-block;">Выберите метод оплаты:</p>
+            <select id="payment_type" style="height:38px;" name="payment_type">
+                <option value="wire100">Перечисление 100%</option>
+                <option value="wire50">Перечисление 50%</option>
+                <option value="wire25">Перечисление 25%</option>
+                <option value="cash">Наличные</option>
+            </select>
+        </div>
+
+        <div class="mb-3 col-sm-4">
+            <p style="line-height: 38px; margin-bottom: 0; font-size: 20px; font-weight: 300; margin-right: 20px;display:inline-block;">Баланс:</p>
+            <div class="agent_info">Наличные: X сум</div>
+            <div class="agent_info">На счету: X сум</div>
+            <p></p>
+        </div>
+        -->
+
+    </div>
+    <!--
+    {#    <div class="row">#}
+    {#        <div class="mb-3 col-sm-4">#}
+    {#            <p style="line-height: 38px; margin-bottom: 0; font-size: 20px; font-weight: 300; margin-right: 20px;display:inline-block;">#}
+    {#                Метод оплаты:</p>#}
+    {#            <div>#}
+    {#                <label>#}
+    {#                    <input type="checkbox" class="pharmacy-only" value="1" onchange="getPharmacyOnly(this)">#}
+    {#                    Наличные#}
+    {#                </label>#}
+    {#                <label>#}
+    {#                    <input type="checkbox" class="pharmacy-only" value="1" onchange="getPharmacyOnly(this)">#}
+    {#                    Предоплата 100%#}
+    {#                </label>#}
+    {#                <label>#}
+    {#                    <input type="checkbox" class="pharmacy-only" value="1" onchange="getPharmacyOnly(this)">#}
+    {#                    Предоплата 50%#}
+    {#                </label>#}
+    {#                <label>#}
+    {#                    <input type="checkbox" class="pharmacy-only" value="1" onchange="getPharmacyOnly(this)">#}
+    {#                    Предоплата 25%#}
+    {#                </label>#}
+    {#            </div>#}
+    {#        </div>#}
+    {#    </div>#}
+    <hr>
+    -->
+    <div id="basket-controls-panel" class="row justify-content-center" style="display:none;">
+
+{#        <div class="form-group">#}
+{#                        <div class="g-recaptcha" data-sitekey="6LfgoLMUAAAAABWvxyMrfKbBg6EDQXboGwmA0sYX"></div></div>#}
+
+
+        <button id="display-matrix" class="btn btn-dark hidden" ><i class="fas fa-reload"></i> Рассчитать матрицу</button>
+
+        <button id="select-all-suppliers" class="btn btn-outline-dark basket-controls"><i class="fas fa-check"></i> Выделить всех поставщиков</button>
+
+        <button id="select-suppliers" class="btn btn-primary basket-controls"><i class="fas fa-address-book"></i> Выбрать предпочитаемых поставщиков</button>
+
+        <button id="reload-matrix-using-mivs" class="btn btn-success basket-controls" ><i class="fas fa-calculator"></i> Рассчитать оптимальный закуп</button>
+
+        <button id="clear-basket" class="btn btn-danger basket-controls" ><i class="fas fa-shopping-basket"></i> Очистить корзину</button>
+
+    </div>
+        <hr>
+        <div id="cart-contents-div" class="px-3 mx-auto">
+
+            <div id="cart-empty-text" style="display: none">
+                <h3 class="text-center">Корзина пуста. Добавьте товар для рассчета закупа</h3>
+            </div>
+
+            <div class="cart-items-block" >
+                <div class="loading text-center">
+                    <div class="loading_content">
+                        <div class="spinner-border" role="status">
+                            <span class="sr-only"></span>
+                        </div>
+                        <div>Обновляем содержимое корзины...</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div id="matrix-table">
+
+            <table id="sp_matrix" class="table table-striped table-bordered" style="width:100%">
+
+                <thead>
+                    <tr>
+
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                </tbody>
+
+                <tfoot>
+                    <tr>
+
+                    </tr>
+                </tfoot>
+
+            </table>
+
+        </div>
+
+        <hr>
+
+
+        <h2 style="text-align: center;">Общий план закупа</h2>
+        <div id="outdated-plan" class="row justify-content-center" style="display:none;">
+            <i class="fas fa-warning fa-2x text-warning" style="margin-right: .3em"></i>
+            <h2 class="text-warning"> План устарел, требуется перерассчет</h2>
+        </div>
+
+        <br>
+
+        <a href="#mivs-procurement-plan" id="plan-grip" hidden></a>
+        <div id="mivs-procurement-plan">
+
+        </div>
+
+
+    </div>
+
+    <div id="myModal" class="modal fade" role="dialog">
+        <div class="modal-dialog mx-4">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h4 class="modal-title mr-4">Выбор предпочитаемых поставщиков</h4>
+
+                    <button type="button" class="btn btn-outline-primary save-supplier-preferences" data-dismiss="modal" onclick="saveSupplierPreferences()">Сохранить</button>
+                    <!--<button type="button" class="btn btn-default" data-dismiss="modal" onclick="saveChangesPrompt()">Закрыть</button>-->
+                    <button type="button" class="btn btn-default" onclick="closeModal()">Закрыть</button>
+                </div>
+                <div class="modal-body">
+
+                    <div class="row">
+                        <div class="col-sm-5">
+
+                            <h4>Предпочитаемые поставщики</h4>
+
+                            <div class="col-sm-4">
+                                <button type="button" id="remove-all-suppliers-from-preferred" class="btn btn-danger"><i class="fas fa-remove"></i> Очистить список</button>
+                            </div>
+
+                            <br>
+
+                            <ul id="preferred-list" class="list-group">
+
+                            </ul>
+                        </div>
+
+                        <div class="col">
+                            <h4 class="modal-title mr-4">Поиск поставщиков <input type="text" id="product_input" oninput="searchForSupplier()" placeholder="Введите название"></h4>
+                            <div class="row">
+                                <div class="col-sm-3">
+                                    <button type="button" id="move-all-suppliers-to-preferred" class="btn btn-primary"><i class="fas fa-plus"></i> Добавить всех в предпочитаемые</button>
+                                </div>
+
+                            </div>
+
+                            <table id="all_suppliers" class="table table-striped table-bordered tasks-table" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Название</th>
+                                    <th>Мин. сумма закупа</th>
+                                     <!--<th></th>-->
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                        </div>
+                        </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default save-supplier-preferences" data-dismiss="modal" onclick="saveSupplierPreferences()">Сохранить</button>
+                    <button type="button" class="btn btn-default" onclick="closeModal()">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="large-loading text-center">
+                <div id="action-processing">
+                    <div class="spinner">
+                        <div class="rect1"></div>
+                        <div class="rect2"></div>
+                        <div class="rect3"></div>
+                        <div class="rect4"></div>
+                        <div class="rect5"></div>
+                    </div>
+                    <h2>В процессе...</h2>
+                </div>
+        </div>
+
+
+
+
+{% end %}
+
+
+{% block bottom %}
+<script>
+    var matrixTable;
+    var selectedForMatrix = {{ selected_for_matrix }};
+    var preferredSuppliers = {{ preferred_suppliers }};
+    var None = undefined;
+    var procurement_plan = {% raw procurement_plan %};
+    // console.log('initial select for matrix - ', selectedForMatrix);
+    var matrixSupplierIds = [];
+    var numOfSuppliers;
+    var minCosts;
+    var sums100;
+    var sums50;
+    var sums25;
+    var sumsCash;
+    var supplierIds;
+    var preferredFromMatrix = [];
+
+    var batchSupPref = {};
+    var batchSupPrefInit = {};
+
+    var pharmacyOnly = 0;
+    var urgentOnly = 0;
+    var Toast = Swal.mixin({
+        toast: true,
+        position: 'bottom-start',
+        showConfirmButton: false,
+        timer: 3000
+    });
+    $('#all_suppliers').on("change", 'input[class=preferred-supplier]' , function (e) {
+        var box = $(this);
+        var supplierId = parseInt(box.attr('data-supplier-id'));
+
+
+        if(this.checked) {
+            // do something when checked
+
+            if ( !preferredSuppliers.includes(supplierId) ) {
+                console.log('add');
+                preferredSuppliers.push(supplierId);
+
+            }
+        }
+
+        else {
+            console.log('remove');
+            preferredSuppliers.splice(preferredSuppliers.indexOf(supplierId), 1);
+        }
+    });
+
+    function searchForSupplier() {
+        var input, filter, table, tr, td, i, txtValue;
+          input = document.getElementById("product_input");
+          filter = input.value.toUpperCase();
+          table = document.getElementById("all_suppliers");
+          tr = table.getElementsByTagName("tr");
+
+          // Loop through all table rows, and hide those who don't match the search query
+          for (i = 0; i < tr.length; i++) {
+            td = tr[i].getElementsByTagName("td")[1];
+            if (td) {
+              txtValue = td.textContent || td.innerText;
+              if (txtValue.toUpperCase().indexOf(filter) > -1) {
+                tr[i].style.display = "";
+              } else {
+                tr[i].style.display = "none";
+              }
+            }
+          }
+    }
+
+    function callDeleteNotification(str) {
+
+        Toast.fire({
+          type: 'success',
+          title: 'Удалено: ' + str
+        });
+    }
+
+    function callAddNotification(str) {
+
+        Toast.fire({
+          type: 'success',
+          title: 'Добавлено: ' + str
+        });
+    }
+
+    function closeModal() {
+
+        Swal.fire({
+            title: 'Сохранить изменения?',
+            text: 'Внесенные изменения будут доступны до перезагрузки страницы',
+            type: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'OK',
+            cancelButtonText: 'Нет',
+        }).then((result) => {
+            if (result.value) {
+                saveSupplierPreferences();
+                $('#myModal').modal('hide');
+            }
+            else {
+                $('#myModal').modal('hide');
+            }
+        });
+    }
+
+
+    function saveSupplierPreferences() {
+
+        var params = {};
+        params["supplier_ids"] = preferredSuppliers;
+        params["min_costs"] = minCosts;
+
+        params['new_suppliers'] = batchSupPref;
+
+        $('.large-loading').fadeIn('fast');
+
+        var request = $.ajax({
+            url: '/procurement/basket/save_suppliers',
+            dataType: "json",
+            type: "POST",
+            data: { 'values' : JSON.stringify(params) },
+
+
+            success: function() {
+                $('.large-loading').fadeOut('fast');
+                Swal.fire({
+                    title: 'Изменения сохранены',
+                    type: 'success',
+                    confirmButtonText: 'OK'
+                });
+
+                loadMatrix();
+
+                $('.dataTables_scrollHead thead tr').find('.included-in-list').each( function(e, f) {
+
+                    if ( preferredSuppliers.includes( parseInt( $(f).attr('data-supplier-id') )) ) {
+                        $(f).attr('checked', true);
+                    }
+
+                    else {
+                        $(f).attr('checked', false);
+                    }
+
+
+
+                });
+
+            },
+
+            error:function() {
+
+                alert('Error');
+                $('.large-loading').fadeOut('fast');
+            }
+        });
+
+    }
+
+
+    function includeInSuppliers(checkbox) {
+
+        console.log('clicked on supplier checkbox');
+        var supplierId = parseInt($(checkbox).attr('data-supplier-id'));
+
+        if( checkbox.checked == true){
+            console.log('checked');
+            preferredFromMatrix.push(supplierId);
+        }
+
+        else {
+            console.log('unchecked');
+            preferredFromMatrix.splice($(preferredFromMatrix).index(supplierId));
+        }
+
+       console.log(preferredFromMatrix);
+
+    }
+
+
+    function getPharmacyOnly(checkbox) {
+
+        console.log('clicked on pharmacy checkbox');
+
+        if ( $('.pharmacy-only').is(":checked") ) {
+            console.log('checked');
+            pharmacyOnly = 1;
+        }
+        else {
+            console.log('unchecked');
+            pharmacyOnly = 0;
+       }
+       loadMatrix();
+    }
+
+    function getUrgentOnly(checkbox) {
+
+        console.log('clicked on urgent checkbox')
+
+        if ( $('.urgent-only').is(":checked") ) {
+            console.log('checked')
+            urgentOnly = 1;
+        }
+        else {
+            console.log('unchecked')
+            urgentOnly = 0;
+       }
+
+       loadMatrix();
+    }
+
+
+    function numberWithSpaces(x) {
+        if (x != undefined) {
+            return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+        }
+    }
+
+    // INTERFACE FUNCTION (NOT WORKING )
+    function updateDataTarget() {
+        console.log('fre update data target');
+        loadMatrix()
+    }
+
+
+    function loadProcurementPlanData(data) {
+        // DATA ENTRIES
+        var mivs_result = data.mivs_result;
+        var suppliers = data.suppliers;
+        var products = data.products;
+        var keys_localized = data.keys_localized;
+
+        console.log(mivs_result);
+
+        var row = $('<div></div>');
+        row.attr('class', 'row');
+
+        var col = $('<div></div>');
+        col.attr('class', 'col-3');
+
+        var main_ul = $('<ul></ul>');
+        main_ul.attr('class', 'list-group');
+
+        var li = $('<li></li>');
+        li.attr('class', 'list-group-item');
+
+        var span = $('<span></span>');
+        span.attr('class', 'badge badge-success');
+
+        var rows = [];
+
+        // CREATE ROWS
+        var numberOfCols = 4;
+        var numberOfRows = Math.ceil(Object.keys(mivs_result).length / numberOfCols);
+
+        for (var i = 0; i < numberOfRows; i++) {
+            // row = $('<div></div>');
+            // row.attr('class', 'row');
+            rows.push(row)
+        }
+
+        // console.log('rows - ', rows);
+        // console.log(rows[0]);
+
+        // LOOPING THROUGH data
+        // OPTION A
+
+        Object.entries(mivs_result).forEach(function (entry) {
+
+            // GETTING SUPPLIER NAMES
+            //console.log( 'entry[0] -- ', entry[0]);
+
+            var objectIndex = Object.keys(mivs_result).indexOf(entry[0]);
+            var rowsIndex = Math.floor(objectIndex / numberOfCols);
+
+            console.log('obj ind - ', objectIndex);
+            console.log('Num of rows - ', numberOfRows);
+            console.log('Index of row to add in - ', rowsIndex);
+
+
+            col.empty();
+            main_ul.empty();
+            li.empty();
+
+            var hText = $('<h3></h3>');
+            hText.text(suppliers[entry[0]]);
+
+            li.addClass('list-group-item-dark');
+
+            li.append(hText);
+            main_ul.append(li.clone());
+
+            Object.entries(entry[1]).forEach(function (smallEntry) {
+
+
+                // GET KEYS
+                var small_li = $('<li></li>');
+                small_li.attr('class', 'list-group-item list-group-item-secondary');
+                small_li.text(keys_localized[smallEntry[0]] + ' ');
+
+                if (smallEntry[1].constructor === Object) {
+
+                    // GETTING MIVS RESULT KEYS BY EACH SUPPLIER
+                    console.log(keys_localized[smallEntry[0]], ' is an Object ');
+
+                    var sublist = $('<ul></ul>');
+                    sublist.attr('class', 'list-group');
+
+                    Object.entries(smallEntry[1]).forEach(function (subEntry) {
+
+                        // NAMES OF
+                        var sub_item = $('<li></li>');
+                        sub_item.attr('class', 'list-group-item');
+                        sub_item.text(keys_localized[subEntry[0]]);
+
+                        if (Object.keys(subEntry[1]).length == 0) {
+                            sub_item.css("text-decoration", "line-through");
+                        }
+
+
+                        if (subEntry[1].constructor === Object) {
+
+
+                            console.log('object - ', subEntry);
+
+                            var en_list = $('<ul></ul>');
+                            en_list.attr('class', 'list-group');
+
+                            Object.entries(subEntry[1]).forEach(function (en) {
+
+                                console.log(en);
+
+                                var en_item = $('<li></li>');
+                                en_item.attr('class', 'list-group-item');
+
+                                // GETTING PRODUCT NAMES
+                                en_item.text(products[en[0]] + ' ');
+
+                                // QUANTITIES
+                                var en_span = span;
+                                en_span.text(en[1] + ' шт.');
+                                en_item.append(en_span.clone());
+                                en_list.append(en_item);
+
+                            });
+
+                            sub_item.append(en_list);
+
+                        } else {
+
+                        }
+
+                        sublist.append(sub_item)
+
+                    });
+
+                    small_li.append(sublist);
+
+                } else {
+
+                    span.text(numberWithSpaces(smallEntry[1]) + ' сум');
+
+                    small_li.append(span.clone());
+                }
+
+
+                main_ul.append(small_li.clone());
+
+            });
+
+            col.append(main_ul.clone());
+            rows[rowsIndex].append(col.clone());
+            //row.append(col.clone());
+
+        });
+
+        // $('#mivs-procurement-plan').append(row);
+
+        Object.entries(rows).forEach(function (r) {
+            $('#mivs-procurement-plan').append(r[1]);
+        });
+    }
+
+    function modifyMinimumSupplierCost(tr, button) {
+        var data = {};
+
+        var li = $(button).closest('li');
+
+        console.log(li);
+
+        var supplier_id = $(li).find('.del-pref-button').attr("data-preferred-supplier-id");
+        var cost = $(li).find('.min-sup-cost-input').val();
+        var supplierName = $(li).text();
+
+        button.removeAttr('disabled');
+        button.html('<i class="fas fa-edit"></i>');
+        Toast.fire({
+                      type: 'success',
+                      title: 'Мин. сумма изменена: ' + supplierName
+                    });
+
+        batchSupPref[supplier_id] = parseInt(cost)
+
+        /*
+        $.ajax({
+                // TODO: SUPPLIER MODIFY HANDLER AND BACKEND LOGIC
+                url: "/edit_min_cost",
+                type: "post",
+                data: data,
+                dataType: "json",
+                error: function (data) {
+                    alert("error");
+
+                    button.removeAttr('disabled');
+                    button.html('<i class="fas fa-edit"></i>');
+                },
+                success: function (data) {
+                    button.removeAttr('disabled');
+                    button.html('<i class="fas fa-edit"></i>');
+
+                    Toast.fire({
+                      type: 'success',
+                      title: 'Мин. стоимость сохранена: ' + supplierName
+                    });
+
+                }
+            });
+        */
+    }
+
+
+    function checkProcurementPlanActuality() {
+
+        var provisionsInPlan = procurement_plan["provision_ids"].map(function(v) {
+            return parseInt(v, 10);
+        });
+
+
+
+        //$('#sp_matrix').find('input[class="matrix-quantity"]').each( function() {
+
+            //var prov_id = $(this).attr('data-provision-id');
+            //
+            //if (!provisionsInPlan.includes(prov_id)) {
+            //    provisionsInPlan.push(parseInt(prov_id))
+            //}
+
+        //});
+
+        var areSameProvisionArrays;
+
+        areSameProvisionArrays = (selectedForMatrix.length === provisionsInPlan.length);
+
+        console.log('areSameProvisionArrays: ' ,areSameProvisionArrays);
+
+        provisionsInPlan.sort();
+        console.log(provisionsInPlan);
+        selectedForMatrix.sort();
+        console.log(selectedForMatrix);
+
+        for (var i = provisionsInPlan.length; i--;) {
+            if (provisionsInPlan[i] !== selectedForMatrix[i])
+                areSameProvisionArrays = false;
+        }
+
+        if (!areSameProvisionArrays && $('#mivs-procurement-plan').length > 0) {
+            $("#outdated-plan").show();
+        }
+
+        else {
+            $("#outdated-plan").hide();
+        }
+
+    }
+
+    $(document).ready(function() {
+
+
+
+        var token = Cookies.get("_xsrf");
+
+        $.ajaxSetup({
+            headers: {
+              "X-XSRFToken": token
+            }
+        });
+
+        var agent_id = {{ agent_id }};
+
+        var suppliersRequest = $.ajax({
+
+            url: '/procurement/basket/suppliers/data.json',
+            data: { 'agent_id' : agent_id },
+            type: "GET",
+            dataType: "JSON",
+
+            success: function(data) {
+
+                console.log('data?  ', data);
+
+                if (data["result"].length > 0) {
+
+                    var preferred_ul = $('#preferred-list');
+
+                    var preferred_li = $('<li></li>');
+                    preferred_li.addClass("list-group-item");
+
+                    for (var i = 0; i < data["result"].length; i++) {
+
+                        var checkbox = $('<input type="checkbox" class="preferred-supplier">');
+
+                        var supplierName = data["result"][i][0];
+
+                        preferred_li.empty();
+
+                        var addBtnDiv = $('<div></div>');
+                            addBtnDiv.attr('class', 'add-pref-button');
+                            addBtnDiv.attr('title', 'Добавить в предпочитаемые');
+                            addBtnDiv.attr('data-preferred-supplier-id', data["result"][i][1]);
+
+                        var addButton = $('<button></button>');
+                            addButton.attr('class', 'add-item');
+                            var it2 = $('<i></i>');
+                            it2.attr('class', 'fa fa-plus text-success fa-lg');
+                            addButton.append(it2);
+
+                            addBtnDiv.append(addButton);
+
+                        if ( preferredSuppliers.includes(data["result"][i][1]) ) {
+
+                            console.log('append to ul, ', supplierName);
+
+                            var delBtnDiv = $('<div></div>');
+                            delBtnDiv.attr('class', 'del-pref-button');
+                            delBtnDiv.attr('title', 'Удалить из предпочтений');
+                            delBtnDiv.attr('data-preferred-supplier-id', data["result"][i][1]);
+
+
+                            var delButton = $('<button></button>');
+                            delButton.attr('class', 'delete-item');
+                            var it = $('<i></i>');
+                            it.attr('class', 'fa fa-remove text-danger fa-lg');
+                            delButton.append(it);
+
+                            delBtnDiv.append(delButton);
+
+                            preferred_li.text(supplierName);
+                            preferred_li.append(delBtnDiv);
+
+                            var inputMin = $('<input type="number" disabled="disabled" min="0" max="999999" class="min-sup-cost-input" placeholder="Минимальная стоимость закупа">');
+
+                            inputMin.val(data["result"][i][2]);
+
+                            preferred_li.append(inputMin);
+                            var btnEditMin = $('<button type="button" class="btn btn-primary edit-min-sup"><i class="fas fa-edit"></i></button>');
+                            preferred_li.append(btnEditMin);
+
+                            preferred_ul.append(preferred_li.clone());
+
+                            checkbox = $('<input type="checkbox" class="preferred-supplier" checked>');
+
+                            batchSupPref[data["result"][i][1]] = parseInt(inputMin.val());
+
+                            // COPYING ENTRIES TO COMPARE LATER ON
+                            batchSupPrefInit[data["result"][i][1]] = parseInt(inputMin.val());
+
+
+                        }
+
+                        checkbox.attr('data-supplier-id', data["result"][i][1]);
+
+                        var row = $('<tr></tr>');
+                        var checkboxCell = $('<td></td>');
+                        var nameCell = $('<td></td>');
+                        var editBtnCell = $('<td></td>');
+
+                        var minCostCell = $('<td></td>');
+                        minCostCell.text(data["result"][i][2]);
+
+                        var inputMinTd = $('<td class="can-modify modify-cost"></td>');
+                        //var inputMin = $('<input type="number" disabled="disabled" min="0" max="999999" class="min-sup-cost-input">');
+                        //var btnEditMin = $('<button type="button" class="btn btn-primary edit-min-sup"><i class="fas fa-edit"></i></button>');
+
+                        inputMinTd.append(inputMin);
+
+                        checkboxCell.append(addBtnDiv);
+
+                        nameCell.text(supplierName);
+
+                        editBtnCell.append(btnEditMin);
+
+                        if ( !preferredSuppliers.includes(data["result"][i][1]) ) {
+                            //row.append(checkboxCell, nameCell, inputMinTd, editBtnCell);
+                            row.append(checkboxCell, nameCell, minCostCell);
+                            $('#all_suppliers').find('tbody').append(row.clone());
+                        }
+
+
+
+
+                    }
+                }
+            },
+
+            error: function (data) {
+                alert('error')
+            }
+
+        });
+
+        if (procurement_plan !== {}) {
+            loadProcurementPlanData(procurement_plan);
+        }
+
+        loadMatrix();
+
+        $('#basket-controls-panel').fadeIn('fast');
+        /*
+        $('#matrix-table').on('xhr', function () {
+            console.log('find matrix table')
+            console.log(matrixTable)
+        })
+        */
+
+    });
+
+
+
+        $("#plan-grip").on('click', function(event) {
+
+            // Make sure this.hash has a value before overriding default behavior
+            if (this.hash !== "") {
+              // Prevent default anchor click behavior
+              event.preventDefault();
+
+              // Store hash
+              var hash = this.hash;
+
+              // Using jQuery's animate() method to add smooth page scroll
+              // The optional number (800) specifies the number of milliseconds it takes to scroll to the specified area
+              $('html, body').animate({
+                scrollTop: $(hash).offset().top
+              }, 800, function(){
+
+                // Add hash (#) to URL when done scrolling (default click behavior)
+                window.location.hash = hash;
+              });
+            } // End if
+          });
+
+    // ADD SUPPLIER TO PREFERRED, DELETE FROM LIST OF ALL SUPPLIERS
+        $("#all_suppliers").on('click', '.add-pref-button', function () {
+
+            var addBtnRow = $(this).closest('tr');
+
+            var supplierName = $(this).closest('tr').find('td').eq(1).text();
+            var supplierId = $(this).closest('tr').find('.add-pref-button').eq(0).attr('data-preferred-supplier-id');
+            var minCost = $(this).closest('tr').find('td').eq(2).text();
+
+            console.log('supplier id on add ', supplierId);
+
+            var toAddLi = $('<li class="list-group-item"></li>');
+
+            toAddLi.text(supplierName);
+
+            var delBtnDiv = $('<div></div>');
+            delBtnDiv.attr('class', 'del-pref-button');
+            delBtnDiv.attr('title', 'Удалить из предпочтений');
+            delBtnDiv.attr('data-preferred-supplier-id', supplierId);
+
+            var delButton = $('<button></button>');
+            delButton.attr('class', 'delete-item');
+            var it = $('<i></i>');
+            it.attr('class', 'fa fa-remove text-danger fa-lg');
+            delButton.append(it);
+
+            delBtnDiv.append(delButton);
+
+            toAddLi.text(supplierName);
+            toAddLi.append(delBtnDiv);
+
+            var inputMin = $('<input type="number" disabled="disabled" min="0" max="999999" class="min-sup-cost-input" placeholder="Минимальная стоимость закупа">');
+            inputMin.val(minCost);
+            toAddLi.append(inputMin);
+
+            var btnEditMin = $('<button type="button" class="btn btn-primary edit-min-sup"><i class="fas fa-edit"></i></button>');
+            toAddLi.append(btnEditMin);
+
+            $('#preferred-list').append(toAddLi);
+
+            addBtnRow.remove();
+            preferredSuppliers.push(parseInt(supplierId));
+
+            batchSupPref[supplierId] = parseInt(minCost);
+
+
+            callAddNotification(supplierName);
+
+        });
+
+        // DELETE SUPPLIER FROM PREFERRED, ADD TO LIST OF ALL SUPPLIERS
+        $("#preferred-list").on('click', '.del-pref-button', function () {
+
+            var button = $(this);
+            var listElem = button.parent();
+
+            var supplierName = listElem.text();
+            var tr = $('<tr></tr>');
+
+            var btnTd = $('<td></td>');
+            var nameTd = $('<td></td>');
+            var supplierId = button.attr('data-preferred-supplier-id');
+
+            console.log('supplier id on delete ', supplierId);
+
+            var costTd = $('<td></td>');
+            var cost = $(listElem).find('.min-sup-cost-input').val();
+
+            console.log(cost);
+
+            costTd.text(cost);
+
+            var addBtnDiv = $('<div></div>');
+            addBtnDiv.attr('class', 'add-pref-button');
+            addBtnDiv.attr('title', 'Добавить в предпочитаемые');
+            addBtnDiv.attr('data-preferred-supplier-id', supplierId);
+
+            var addButton = $('<button></button>');
+            addButton.attr('class', 'add-item');
+            var it = $('<i></i>');
+            it.attr('class', 'fa fa-plus text-success fa-lg');
+            addButton.append(it);
+
+            addBtnDiv.append(addButton);
+
+            btnTd.append(addBtnDiv);
+            nameTd.text(supplierName);
+
+            supplierId = parseInt(supplierId);
+
+            tr.append(btnTd, nameTd, costTd);
+
+            $('#all_suppliers tbody').append(tr);
+
+            listElem.remove();
+
+            if (preferredSuppliers.includes(supplierId)) {
+                preferredSuppliers.splice(preferredSuppliers.indexOf(supplierId), 1);
+            }
+
+            delete batchSupPref[supplierId.toString()];
+
+            callDeleteNotification(supplierName);
+
+        });
+
+
+        $('#move-all-suppliers-to-preferred').on('click', function () {
+            $('#all_suppliers tbody tr').each( function (e, v) {
+                var addBtnRow = $(v);
+
+                var supplierName = $(v).find('td').eq(1).text();
+                var supplierId = $(v).find('.add-pref-button').eq(0).attr('data-preferred-supplier-id');
+                var minCost = $(v).find('td').eq(2).text();
+
+                console.log('supplier id on add ', supplierId);
+
+                var toAddLi = $('<li class="list-group-item"></li>');
+
+                toAddLi.text(supplierName);
+
+                var delBtnDiv = $('<div></div>');
+                delBtnDiv.attr('class', 'del-pref-button');
+                delBtnDiv.attr('title', 'Удалить из предпочтений');
+                delBtnDiv.attr('data-preferred-supplier-id', supplierId);
+
+                var delButton = $('<button></button>');
+                delButton.attr('class', 'delete-item');
+                var it = $('<i></i>');
+                it.attr('class', 'fa fa-remove text-danger fa-lg');
+                delButton.append(it);
+
+                delBtnDiv.append(delButton);
+
+                toAddLi.text(supplierName);
+                toAddLi.append(delBtnDiv);
+
+                var inputMin = $('<input type="number" disabled="disabled" min="0" max="999999" class="min-sup-cost-input" placeholder="Минимальная стоимость закупа">');
+                inputMin.val(minCost);
+                toAddLi.append(inputMin);
+
+                var btnEditMin = $('<button type="button" class="btn btn-primary edit-min-sup"><i class="fas fa-edit"></i></button>');
+                toAddLi.append(btnEditMin);
+
+                $('#preferred-list').append(toAddLi);
+
+                addBtnRow.remove();
+                preferredSuppliers.push(parseInt(supplierId));
+
+                batchSupPref[supplierId] = parseInt(minCost);
+
+            })
+        });
+
+
+
+        $('#remove-all-suppliers-from-preferred').on('click', function () {
+            $('#preferred-list').find('li').each( function (e, v) {
+
+                var listElem = $(v);
+
+                var supplierName = listElem.text();
+                var tr = $('<tr></tr>');
+
+                var btnTd = $('<td></td>');
+                var nameTd = $('<td></td>');
+
+                var supplierId = listElem.find('.del-pref-button').attr('data-preferred-supplier-id');
+
+                var minCostTd = $('<td></td>');
+
+
+                console.log('supplier id in list clear', supplierId);
+
+                var addBtnDiv = $('<div></div>');
+                addBtnDiv.attr('class', 'add-pref-button');
+                addBtnDiv.attr('title', 'Добавить в предпочитаемые');
+                addBtnDiv.attr('data-preferred-supplier-id', supplierId);
+
+                var addButton = $('<button></button>');
+                addButton.attr('class', 'add-item');
+                var it = $('<i></i>');
+                it.attr('class', 'fa fa-plus text-success fa-lg');
+                addButton.append(it);
+
+                addBtnDiv.append(addButton);
+
+                btnTd.append(addBtnDiv);
+                nameTd.text(supplierName);
+
+                var minCost = $(listElem).find('.min-sup-cost-input').val();
+                minCostTd.text(minCost);
+
+                tr.append(btnTd, nameTd, minCostTd);
+
+                $('#all_suppliers tbody').append(tr);
+
+                listElem.remove();
+
+                delete batchSupPref[parseInt(supplierId)];
+
+                preferredSuppliers = [];
+
+                Toast.fire({
+                  type: 'success',
+                  title: 'Список предпочтений очищен'
+                });
+            })
+        });
+
+
+    $('#select-suppliers').on("click", function () {
+        $('#myModal').modal();
+    });
+
+    $('#basket-controls-panel').on("click", '#select-all-suppliers', function () {
+
+        var btn = $(this);
+
+        $('.dataTables_scrollHead thead tr').find('.included-in-list').each( function(e, f) {
+            $(f).attr('checked', true);
+
+            var supId = parseInt($(f).attr('data-supplier-id'));
+
+            if (!preferredFromMatrix.includes(supId)) {
+                preferredFromMatrix.push(supId);
+            }
+        });
+
+        btn.attr("id", "unselect-all-suppliers");
+        btn.text("");
+        btn.append("<i class='fas fa-check'></i> Снять выделение");
+
+
+    });
+
+    $('#basket-controls-panel').on("click", '#unselect-all-suppliers', function () {
+
+        var btn = $(this);
+
+        $('.dataTables_scrollHead thead tr').find('.included-in-list').each( function(e, f) {
+            $(f).attr('checked', false);
+
+            var supId = parseInt($(f).attr('data-supplier-id'));
+
+            if (preferredFromMatrix.includes(supId)) {
+                preferredFromMatrix.splice(preferredFromMatrix.indexOf(supId), 1);
+            }
+        });
+
+
+        btn.attr("id", "select-all-suppliers");
+        btn.text("");
+        btn.append("<i class='fas fa-check'></i> Выделить всех поставщиков");
+
+
+    });
+
+
+    $('#display-matrix').on("click", function () {
+        loadMatrix();
+    });
+
+
+    function sumFoot(sums100, sums50, sums25, sumsCash, firstLoad=true) {
+        var local_sums_100 = sums100;
+        var local_sums_50 = sums50;
+        var local_sums_25 = sums25;
+        var local_sums_cash = sumsCash;
+
+        // PRICE * QUANTITY
+
+        var footerHtml = '';
+        footerHtml += "<tr><th></th><th></th>";
+
+
+        for (var i=0; i < local_sums_100.length; i++ ) {
+
+            footerHtml += "<th data-wire100-sum='" + local_sums_100[i] + "'>";
+            footerHtml += numberWithSpaces(local_sums_100[i]) + " сум";
+
+            //footerHtml += "<p class='wire100_sum' data-wire100-sum='" + local_sums_100[i] + "'>100%: " + numberWithSpaces(local_sums_100[i]) + " сум</p>";
+
+            /*
+            footerHtml += "<p class='wire50_sum' data-wire50-sum='" + local_sums_50[i] + "'>50%: " + numberWithSpaces(local_sums_50[i]) + " сум</p>";
+            footerHtml += "<p class='wire25_sum' data-wire25-sum='" + local_sums_25[i] + "'>25%: " + numberWithSpaces(local_sums_25[i]) + " сум</p>";
+            footerHtml += "<p class='cash_sum' data-cash-sum='" + local_sums_cash[i] + "'>Нал.: " + numberWithSpaces(local_sums_cash[i]) + " сум</p>";
+            */
+            footerHtml += "</th>";
+
+        }
+
+        footerHtml += "</tr>";
+
+        // MIN SUPPLIER COSTS
+
+        if (firstLoad === true) {
+            footerHtml += "<tr><th></th><th style='writing-mode:horizontal-tb; text-align: center; vertical-align: middle;'>Минимальная сумма закупа</th>";
+        }
+        else {
+            footerHtml += "<tr><th></th><th></th>";
+        }
+
+
+        $.each(minCosts, function(i, val){
+            //footerHtml += "<th><p class='min_cost' data-min-cost='" + val + "' >Мин. сумма: " + numberWithSpaces(val) + " сум</p></th>";
+            footerHtml += "<th data-min-cost='" + val + "' >";
+            footerHtml += numberWithSpaces(val) + " сум";
+            footerHtml += "</th>";
+
+        });
+
+        footerHtml += "</tr>";
+
+        // MIN SUPPLIER COSTS
+
+        // MODIFYING FN SUB-TABLE SPAWNED BY FIXED_HEADER
+
+        $('#matrix-table').find('table').eq(2).find('tfoot').html(footerHtml);
+
+        var minSumCells = $('#matrix-table').find('table').eq(2).find('tfoot tr')[0];
+        var footCells = $('#matrix-table').find('table').eq(2).find('tfoot tr th');
+
+        $('#matrix-table').find('table').eq(2).find('tfoot tr').eq(0).find('th').each(function(i) {
+
+            var t = $(this);
+
+
+            // var p_top_100 = Number(t.find('p').attr('data-wire100-sum'));
+            // var p_top_50 = Number(t.find('p').attr('data-wire50-sum'));
+            // var p_top_25 = Number(t.find('p').attr('data-wire25-sum'));
+            // var p_top_cash = Number(t.find('p').attr('data-cash-sum'));
+
+            var p_top_100 = Number(t.attr('data-wire100-sum'));
+
+            var t2 = $('#matrix-table').find('table').eq(2).find('tfoot tr').eq(1).find('th').eq(i);
+            //var p_bot = Number(t2.find('p').attr('data-min-cost')) ;
+            var p_bot = Number(t2.attr('data-min-cost')) ;
+
+            //if (p_top_100 < p_bot || p_top_50 < p_bot || p_top_25 < p_bot || p_top_cash < p_bot ) {
+
+            if (p_top_100 < p_bot ) {
+                $(t).css({'background-color': '#CA3433', 'color': 'black'});
+            }
+
+            else {
+                $(t).css({'background-color': '#2E8B57', 'color': 'black'});
+            }
+
+        });
+
+        matrixTable.columns.adjust().draw();
+
+
+        $('.matrix-quantity').removeAttr('disabled');
+
+    }
+
+
+    function loadMatrix(url = "/procurement/basket/sp_matrix/data.json") {
+
+        // selectedForMatrix = [];
+
+        if (selectedForMatrix.length > 0) {
+
+            $('.cart-items-block .loading').show();
+            $('#cart-empty-text').hide();
+
+            $('.matrix-quantity').attr('disabled', 'disabled');
+            $('.remove-from-matrix').attr('disabled', 'disabled');
+
+            console.log('selected for matrix: ', selectedForMatrix);
+
+            var params = {};
+            params["ids"] = selectedForMatrix;
+
+            params["urgent_procurement"] = urgentOnly;
+            params["pharmacy"] = pharmacyOnly;
+
+            console.log('load matrix with provisions - ', selectedForMatrix);
+
+                $.ajax({
+                    "url": url,
+                    "dataType": "json",
+                    data: { 'values' : JSON.stringify(params) },
+                    success: function(json) {
+
+                        numOfSuppliers = json.columns.length;
+                        minCosts = json.min_costs;
+
+                        sums100 = json.wire_100_sums;
+                        sums50 = json.wire_50_sums;
+                        sums25 = json.wire_25_sums;
+                        sumsCash = json.cash_sums;
+                        supplierIds = json.supplier_ids;
+
+                        var tableHeaders='';
+                        var tableFooters='';
+
+                        var tableCheckboxes = '';
+
+                        $.each(json.columns, function(i, val){
+
+                            if (preferredSuppliers.includes(supplierIds[i])) {
+                                tableCheckboxes += "<th><input type='checkbox' class='included-in-list' data-supplier-id=" + supplierIds[i] + " onchange='includeInSuppliers(this)' checked></th>";
+                            }
+                            else {
+                                tableCheckboxes += "<th><input type='checkbox' class='included-in-list' data-supplier-id=" + supplierIds[i] + " onchange='includeInSuppliers(this)'></th>";
+                            }
+
+                            var short_val = val.substring(0, 13);
+
+                            tableHeaders += "<th class='vertical-text' title='" + val + "'>" + short_val + "</th>";
+                            tableFooters += "<th>" + ' ' + "</th>";
+                        });
+
+                        $("#matrix-table").empty();
+                        $("#matrix-table").append('<table id="sp_matrix" class="table table-striped table-bordered" style="width:100%"><thead><tr><th></th><th></th>' + tableCheckboxes + '</tr><tr><th></th><th></th>' + tableHeaders + '</tr></thead><tfoot><tr><th></th><th></th>'+ tableFooters + '</tr></tfoot></table>');
+
+                        console.log(json);
+
+                        matrixTable = $('#sp_matrix').DataTable({
+                            data:json.data,
+                            lengthChange: false,
+                            autoWidth: true, // must be true for responsive designs when scrolling is enabled
+                            searching: false,
+                            oLanguage: {
+                                "sUrl": "{{ static_url('js/datatable/russian.json') }}"
+                            },
+                            scrollY: "800px",
+                            scrollX: true,
+                            scrollCollapse: true,
+                            paging: false,
+                            async: false,
+
+                            fixedColumns: {
+                                leftColumns: 2,
+                                heightMatch: 'auto'
+                            },
+
+                            "footerCallback": function( settings ) {
+                                var sumFixedText = $('#matrix-table .DTFC_LeftFootWrapper tfoot tr th').eq(1);
+                                sumFixedText.css("font-size");
+                                sumFixedText.text("Сумма выбранных товаров");
+                                var cell = $('.dataTables_scrollFoot tfoot tr').eq(1).find('th').eq(1);
+                                cell.css({'writing-mode': 'horizontal-tb', 'text-align': 'center', 'vertical-align': 'middle'});
+                                cell.text("Минимальная сумма закупа");
+                            },
+
+                            "columnDefs": [
+
+                                {
+                                    "render": function ( data, type, row, meta ) {
+                                        return '<button type="button" class="remove-from-matrix btn btn-danger"><i class="fas fa-times"></i></button><input type="number" class="matrix-quantity" min="1" max="999" data-provision-id="' + json.product_provisions[0][row[1]] + '" value="' + json.data[meta.row][0] + '"/>';
+                                },
+                                    "targets": 0
+
+                                },
+
+
+                                {
+                                    "render": function ( data, type, row, meta, index ) {
+                                        return row[1].substring(0, 15) + ' ( ' + json.prices_quantities[meta.row] + ' )';
+                                },
+                                    "targets": 1
+
+                                },
+
+
+                                {
+                                    "targets": [...Array(json.columns.length).keys()].map(i => i + 2),
+                                    "createdCell": function (td, cellData, rowData, row, col) {
+
+                                          if ( cellData == null || cellData == '' || cellData == 0 ) {
+                                            $(td).css({'background-color': '#CA3433', 'color': 'black', 'opacity': 0.75});
+
+                                          }
+
+                                          else {
+
+                                            var html = "";
+
+                                            if (cellData.wire100 != undefined) {
+
+                                                // html += "<p class='wire100' data-price-wire100=" + cellData.wire100 + "> 100%: " + numberWithSpaces(cellData.wire100) + " сум</p>"
+                                                html += "100%: " + numberWithSpaces(cellData.wire100) + " сум; "
+                                            }
+
+                                            /*
+                                            if (cellData.wire50 != undefined) {
+                                                //html += "<p class='wire50' data-price-wire50=" + cellData.wire50 + "> 50%: " + numberWithSpaces(cellData.wire50) + " сум</p>"
+                                                html += "50%: " + numberWithSpaces(cellData.wire50) + " сум; "
+                                            }
+
+                                            if (cellData.wire25 != undefined) {
+                                                //html += "<p class='wire25' data-price-wire25=" + cellData.wire25 + "> 25%: " + numberWithSpaces(cellData.wire25) + " сум</p>"
+                                                html += "25%: " + numberWithSpaces(cellData.wire25) + " сум; "
+                                            }
+
+                                            if (cellData.cash != undefined) {
+                                                //html += "<p class='cash' data-price-cash=" + cellData.cash + "> Нал.: " + numberWithSpaces(cellData.cash) + " сум</p>"
+                                                html += "наличными: " + numberWithSpaces(cellData.cash) + " сум; "
+                                            }
+                                            */
+                                            //$(td).html(html);
+
+                                            $(td).attr('title', html);
+                                            $(td).html('');
+                                            $(td).css({'background-color': '#2E8B57', 'color': 'black', 'opacity': 0.75});
+                                          }
+                                    }
+                                },
+
+                                {
+                                    "targets": 1,
+
+                                    "createdCell": function (td, cellData, rowData, row, col) {
+
+                                          //console.log(rowData)
+                                          var pricesInRow = rowData.slice(2);
+
+                                          var otherThanNull = pricesInRow.some(function (el) {
+                                              return el !== null;
+                                          });
+
+                                          if ( otherThanNull === false ) {
+                                            $(td).css({'background-color': '#CA3433', 'color': 'black'});
+                                            $(td).attr('data-absent-product', true);
+                                          }
+                                          else {
+                                            $(td).css({'background-color': '#2E8B57', 'color': 'black'});
+                                          }
+
+                                          $(td).attr('title', rowData[1]);
+
+
+                                    }
+                                }
+
+
+                            ],
+
+                            "initComplete": function(settings, json){
+
+                                //sumSP();
+
+                                sumFoot(sums100, sums50, sums25, sumsCash);
+
+                                // Enable TFOOT scoll bars
+                                $('.dataTables_scrollFoot').css('overflow', 'auto');
+
+                                // Sync TFOOT scrolling with TBODY
+                                $('.dataTables_scrollFoot').on('scroll', function () {
+                                    $('.dataTables_scrollBody').scrollLeft($(this).scrollLeft());
+                                });
+
+                                $('.matrix-quantity').removeAttr('disabled');
+                                $('.remove-from-matrix').removeAttr('disabled', 'disabled');
+
+                                $('div.dataTables_filter input').attr('autocomplete', 'off')
+                                  .attr("autocorrect", "off");
+
+                                $('.cart-items-block .loading').hide();
+
+                                // $('.dataTables_scrollBody').off('scroll.DT');
+                                checkProcurementPlanActuality();
+
+                                matrixTable.columns.adjust().draw();
+
+
+                            }
+                        });
+
+
+
+
+                        function sumSP() {
+
+                            var local_sums_100 = sums100;
+                            var local_sums_50 = sums50;
+                            var local_sums_25 = sums25;
+                            var local_sums_cash = sumsCash;
+
+                            // PRICE * QUANTITY
+
+                            var footerHtml = '';
+                            footerHtml += "<tr><th></th><th></th>";
+
+
+                            for (var i=0; i < local_sums_100.length; i++ ) {
+
+                                footerHtml += "<th data-wire100-sum='" + local_sums_100[i] + "'>";
+                                footerHtml += numberWithSpaces(local_sums_100[i]) + " сум";
+
+                                //footerHtml += "<p class='wire100_sum' data-wire100-sum='" + local_sums_100[i] + "'>100%: " + numberWithSpaces(local_sums_100[i]) + " сум</p>";
+
+                                /*
+                                footerHtml += "<p class='wire50_sum' data-wire50-sum='" + local_sums_50[i] + "'>50%: " + numberWithSpaces(local_sums_50[i]) + " сум</p>";
+                                footerHtml += "<p class='wire25_sum' data-wire25-sum='" + local_sums_25[i] + "'>25%: " + numberWithSpaces(local_sums_25[i]) + " сум</p>";
+                                footerHtml += "<p class='cash_sum' data-cash-sum='" + local_sums_cash[i] + "'>Нал.: " + numberWithSpaces(local_sums_cash[i]) + " сум</p>";
+                                */
+                                footerHtml += "</th>";
+
+                            }
+
+                            footerHtml += "</tr>";
+
+                            // MIN SUPPLIER COSTS
+
+                            footerHtml += "<tr><th></th><th style='writing-mode:horizontal-tb; text-align: center; vertical-align: middle;'>Минимальная сумма закупа</th>";
+
+                            $.each(minCosts, function(i, val){
+                                //footerHtml += "<th><p class='min_cost' data-min-cost='" + val + "' >Мин. сумма: " + numberWithSpaces(val) + " сум</p></th>";
+                                footerHtml += "<th data-min-cost='" + val + "' >";
+                                footerHtml += numberWithSpaces(val) + " сум";
+                                footerHtml += "</th>";
+
+                            });
+
+                            footerHtml += "</tr>";
+
+
+                            // MODIFYING FN SUB-TABLE SPAWNED BY FIXED_HEADER
+
+                            $('#matrix-table').find('table').eq(2).find('tfoot').html(footerHtml);
+
+                            var minSumCells = $('#matrix-table').find('table').eq(2).find('tfoot tr')[0];
+                            var footCells = $('#matrix-table').find('table').eq(2).find('tfoot tr th');
+
+                            $('#matrix-table').find('table').eq(2).find('tfoot tr').eq(0).find('th').each(function(i) {
+
+                                var t = $(this);
+
+
+                                // var p_top_100 = Number(t.find('p').attr('data-wire100-sum'));
+                                // var p_top_50 = Number(t.find('p').attr('data-wire50-sum'));
+                                // var p_top_25 = Number(t.find('p').attr('data-wire25-sum'));
+                                // var p_top_cash = Number(t.find('p').attr('data-cash-sum'));
+
+                                var p_top_100 = Number(t.attr('data-wire100-sum'));
+
+                                var t2 = $('#matrix-table').find('table').eq(2).find('tfoot tr').eq(1).find('th').eq(i);
+                                //var p_bot = Number(t2.find('p').attr('data-min-cost')) ;
+                                var p_bot = Number(t2.attr('data-min-cost')) ;
+
+                                //if (p_top_100 < p_bot || p_top_50 < p_bot || p_top_25 < p_bot || p_top_cash < p_bot ) {
+
+                                if (p_top_100 < p_bot ) {
+                                    $(t).css({'background-color': '#CA3433', 'color': 'black'});
+                                }
+
+                                else {
+                                    $(t).css({'background-color': '#2E8B57', 'color': 'black'});
+                                }
+
+                            });
+
+                        }
+
+                    },
+
+                    error: function(json) {
+                        alert("error");
+
+                        $('.matrix-quantity').removeAttr('disabled')
+                        $('.remove-from-matrix').removeAttr('disabled', 'disabled')
+
+                        $('.cart-items-block .loading').hide();
+
+                    },
+
+                });
+        }
+
+        else {
+            $('#cart-empty-text').show();
+            $('.cart-items-block .loading').hide();
+
+        }
+    }
+
+
+    $('#matrix-table').on("change", 'input[class=matrix-quantity]' , function (e) {
+
+            $('.matrix-quantity').attr('disabled', 'disabled');
+
+            var provId = $(this).attr('data-provision-id');
+
+            var input = $(this);
+
+            console.log('Column:'+ $('#matrix-table thead tr th').eq($(this).index()).html().trim());
+
+            var rowIndex = $(this).closest('tr').index();
+            console.log('rowIndex - ', rowIndex);
+
+            var quantity = $(this).val();
+            var oldQuantity = $(this).data('old-val');
+
+            console.log( provId );
+            console.log('old value: ' + oldQuantity + ' new value: ' + quantity);
+
+
+            var params = {};
+            params["provision_id"] = provId;
+            params["quantity"] = quantity;
+            params["old_quantity"] = oldQuantity;
+
+            var request = $.ajax({
+                url: "/procurement/basket/modify_quantity",
+                type: "post",
+                data: params,
+                dataType: "json",
+                // async: false,
+                error: function (data) {
+                    alert("error");
+                },
+                success: function (data) {
+
+                    params = {};
+                    params["ids"] = selectedForMatrix;
+
+                    params["urgent_procurement"] = urgentOnly;
+                    params["pharmacy"] = pharmacyOnly;
+
+                    //loadMatrix()
+
+                    var request_2 = $.ajax({
+                        "url": '/procurement/basket/sp_matrix/data.json',
+                        "dataType": "json",
+                        data: { 'values' : JSON.stringify(params) },
+                        // async: false,
+                        error: function (json) {
+                            alert("error");
+                        },
+
+                        success: function (json) {
+
+                            minCosts = json.min_costs;
+
+                            var refresh_sums100 = json.wire_100_sums;
+                            var refresh_sums50 = json.wire_50_sums;
+                            var refresh_sums25 = json.wire_25_sums;
+                            var refresh_sums_cash = json.cash_sums;
+
+                            sumFoot(refresh_sums100, refresh_sums50, refresh_sums25, refresh_sums_cash, false)
+
+                            $('#sp_matrix').find('input[class="matrix-quantity"]').eq(rowIndex).val(quantity);
+                            $('#matrix-table').find('tbody').eq(1).find('tr').eq(rowIndex).find('input')[0].value = quantity;
+
+                            // matrixTable.columns.adjust().draw();
+                            // CHANGING SUM VALUES IN FOOTER
+
+                            // var minSumCells = $('#matrix-table').find('table').eq(2).find('tfoot tr')[0];
+                            // var footCells = $('#matrix-table').find('table').eq(2).find('tfoot tr th');
+
+                            /* OLD
+                            var footerHtml = '';
+                            footerHtml += "<tr><th></th><th></th>";
+
+
+                            for (var i=0; i < refresh_sums100.length; i++ ) {
+
+                                footerHtml += "<th>";
+                                footerHtml += "<p class='wire100_sum' data-wire100-sum='" + refresh_sums100[i] + "'>100%: " + numberWithSpaces(refresh_sums100[i]) + " сум</p>";
+
+                                footerHtml += "<p class='wire50_sum' data-wire50-sum='" + refresh_sums50[i] + "'>50%: " + numberWithSpaces(refresh_sums50[i]) + " сум</p>";
+                                footerHtml += "<p class='wire25_sum' data-wire25-sum='" + refresh_sums25[i] + "'>25%: " + numberWithSpaces(refresh_sums25[i]) + " сум</p>";
+                                footerHtml += "<p class='cash_sum' data-cash-sum='" + refresh_sums_cash[i] + "'>Нал.: " + numberWithSpaces(refresh_sums_cash[i]) + " сум</p>";
+
+                                footerHtml += "</th>";
+
+                            }
+
+                            footerHtml += "</tr>";
+
+                            // MIN SUPPLIER COSTS
+
+                            footerHtml += "<tr><th></th><th></th>";
+
+                            $.each(minCosts, function(i, val){
+                                footerHtml += "<th><p class='min_cost' data-min-cost='" + val + "' >Мин. сумма: " + numberWithSpaces(val) + " сум</p></th>";
+
+                            });
+
+                            footerHtml += "</tr>";
+
+
+                            // MODIFYING FN SUB-TABLE SPAWNED BY FIXED_HEADER
+
+                            $('#matrix-table').find('table').eq(2).find('tfoot').html(footerHtml);
+
+
+                            var minSumCells = $('#matrix-table').find('table').eq(2).find('tfoot tr')[0];
+
+                            var footCells = $('#matrix-table').find('table').eq(2).find('tfoot tr th');
+
+                            $('#matrix-table').find('table').eq(2).find('tfoot tr').eq(0).find('th').each(function(i) {
+
+                                var t = $(this);
+
+                                var p_top_100 = Number(t.find('p').attr('data-wire100-sum'));
+                                var p_top_50 = Number(t.find('p').attr('data-wire50-sum'));
+                                var p_top_25 = Number(t.find('p').attr('data-wire25-sum'));
+                                var p_top_cash = Number(t.find('p').attr('data-cash-sum'));
+
+
+                                var t2 = $('#matrix-table').find('table').eq(2).find('tfoot tr').eq(1).find('th').eq(i);
+                                var p_bot = Number(t2.find('p').attr('data-min-cost')) ;
+
+
+                                if (p_top_100 < p_bot || p_top_50 < p_bot || p_top_25 < p_bot || p_top_cash < p_bot ) {
+                                    $(t).css({'background-color': '#CA3433', 'color': 'black'});
+                                }
+
+                                else {
+                                    $(t).css({'background-color': '#2E8B57', 'color': 'black'});
+                                }
+
+                            });
+                            */
+
+                            /*
+                            var footerHtml = '';
+                            footerHtml += "<tr><th></th><th style='writing-mode:horizontal-tb; text-align: center; vertical-align: middle;'>Минимальная сумма закупа</th>";
+
+
+                            for (var i=0; i < refresh_sums100.length; i++ ) {
+
+                                footerHtml += "<th data-wire100-sum='" + refresh_sums100[i] + "'>";
+                                footerHtml += numberWithSpaces(refresh_sums100[i]) + " сум";
+                                footerHtml += "</th>";
+
+                            }
+
+                            footerHtml += "</tr>";
+
+                            // MIN SUPPLIER COSTS
+
+                            footerHtml += "<tr><th></th><th></th>";
+
+                            $.each(minCosts, function(i, val){
+                                footerHtml += "<th data-min-cost='" + val + "' >";
+                                footerHtml += numberWithSpaces(val) + " сум";
+                                footerHtml += "</th>";
+
+                            });
+
+                            footerHtml += "</tr>";
+
+
+                            // MODIFYING FN SUB-TABLE SPAWNED BY FIXED_HEADER
+
+                            $('#matrix-table').find('table').eq(2).find('tfoot').html(footerHtml);
+                            $('#matrix-table').find('table').eq(2).find('tfoot tr').eq(0).find('th').each(function(i) {
+
+                                var t = $(this);
+
+                                var p_top_100 = Number(t.attr('data-wire100-sum'));
+
+                                var t2 = $('#matrix-table').find('table').eq(2).find('tfoot tr').eq(1).find('th').eq(i);
+                                //var p_bot = Number(t2.find('p').attr('data-min-cost')) ;
+                                var p_bot = Number(t2.attr('data-min-cost')) ;
+
+                                if (p_top_100 < p_bot ) {
+                                    $(t).css({'background-color': '#CA3433', 'color': 'black'});
+                                }
+
+                                else {
+                                    $(t).css({'background-color': '#2E8B57', 'color': 'black'});
+                                }
+
+                            });
+
+
+                            matrixTable.columns.adjust().draw();
+
+                            console.log("new quantity === ", quantity);
+                            console.log("row index === ", rowIndex);
+
+                            $('#sp_matrix').find('input[class="matrix-quantity"]').eq(rowIndex).val(quantity);
+                            $('#matrix-table').find('tbody').eq(1).find('tr').eq(rowIndex).find('input')[0].value = quantity;
+
+                            $('.matrix-quantity').removeAttr('disabled');
+
+                        }
+                    });
+
+
+                    */
+
+                }
+
+            });
+        }
+    })
+    })
+
+    // # AABB
+    $('#preferred-list').on('click', '.edit-min-sup', function(e){
+            e.preventDefault();
+
+            var p = $(this).closest('li');
+            console.log('p:', p)
+
+            if(p.data("editing")) {
+                p.data("editing", false);
+                $(this).html('<i class="fas fa-edit"></i>');
+                p.find('.min-sup-cost-input').each(function(){
+                    var t = $(this).val();
+                    //$(this).html(t);
+                    $(this).attr('disabled', 'disabled');
+                });
+
+
+                $(this).html('<i class="fas fa-circle-notch fa-spin"></i>');
+                modifyMinimumSupplierCost(p, $(this))
+            } else {
+                p.find('.min-sup-cost-input').each(function(){
+                    var t = $(this).text();
+
+                    console.log('t: ', t);
+
+                    //$(this).html("<input type='number' class='inline-edit' value='"+ t + "'/>");
+                    $(this).removeAttr('disabled');
+                });
+                p.data("editing", true);
+                $(this).html('<i class="fas fa-check"></i>');
+            }
+        });
+
+
+    $('#all_suppliers').on('click', '.edit-min-sup', function(e){
+            e.preventDefault();
+            var p = $(this).closest('tr');
+
+            if(p.data("editing")) {
+                p.data("editing", false);
+                $(this).html('<i class="fas fa-edit"></i>');
+                p.find('.can-modify').each(function(){
+                    var t = $(this).find('input').val();
+                    $(this).html(t);
+                });
+                $(this).attr('disabled', 'disabled');
+                $(this).html('<i class="fas fa-circle-notch fa-spin"></i>');
+                modifyMinimumSupplierCost(p, $(this))
+            } else {
+                p.find('.can-modify').each(function(){
+                    var t = $(this).text();
+
+                    console.log('t: ', t);
+
+                    $(this).html("<input type='number' class='inline-edit' value='"+ t + "'/>");
+                });
+                p.data("editing", true);
+                $(this).html('<i class="fas fa-check"></i>');
+            }
+        });
+
+
+    $("#all_suppliers").on("keypress keyup blur", ".inline-edit", function (event) {
+           $(this).val($(this).val().replace(/[^\d].+/, ""));
+            if ((event.which < 48 || event.which > 57)) {
+                event.preventDefault();
+            }
+        });
+
+    $('#matrix-table').on('click', '.remove-from-matrix', function() {
+        var rowIndex = $(this).closest('tr').index();
+        var provId = parseInt($(this).closest('tr').find('.matrix-quantity').attr('data-provision-id'));
+        var deletedName = $(this).closest('tr').find('td').eq(1).attr('title');
+
+        console.log('closest id to button');
+
+        $('.large-loading').fadeIn('fast');
+
+        if (selectedForMatrix.includes(provId)) {
+            selectedForMatrix.splice(selectedForMatrix.indexOf(provId), 1);
+        }
+
+        console.log('prov id - ', provId);
+
+        var params = {};
+        params["provision_id"] = provId;
+
+        console.log('remaining provisions : ', selectedForMatrix);
+
+        var req = $.ajax({
+            url: "/procurement/basket/remove_item",
+            type: "post",
+            data: params,
+            dataType: "json",
+
+            error: function (data) {
+                alert("error");
+            },
+
+            success: function (data) {
+
+                callDeleteNotification(deletedName);
+
+                if (selectedForMatrix.length > 0) {
+                    loadMatrix();
+                    $('.large-loading').fadeOut('fast');
+                }
+
+                else {
+                    $('#matrix-table').empty();
+                    $('.large-loading').fadeOut('fast');
+                    $('#cart-empty-text').show();
+                }
+
+            }
+
+        });
+
+
+    });
+
+
+    $('#reload-matrix-using-mivs').on('click', function() {
+
+        var absentProducts = [];
+
+
+
+        $('#matrix-table').find('.DTFC_LeftBodyWrapper td:not(:has(input))').each( function () {
+
+            var cell = $(this);
+            var isAbsent = cell.attr('data-absent-product');
+            var name = cell.attr('title');
+
+
+            if (isAbsent) {
+                absentProducts.push(name);
+            }
+
+        });
+
+
+        if (selectedForMatrix.length < 1) {
+           Swal.fire({
+                title: 'Корзина пуста',
+                text: 'Добавьте товары в корзину для рассчета',
+                type: 'error',
+                confirmButtonText: 'OK'
+            })
+        }
+
+        else if (absentProducts.length > 0 ) {
+            Swal.fire({
+                title: 'Удалите недоступные товары из корзины:',
+                html: absentProducts.join('<br/>'),
+                type: 'warning',
+                confirmButtonText: 'OK'
+            });
+        }
+
+        else if (preferredFromMatrix.length === 0 && preferredSuppliers.length === 0) {
+            Swal.fire({
+                title: 'Не выбран поставщик',
+                type: 'warning',
+                confirmButtonText: 'OK'
+            });
+        }
+
+        else {
+
+            Swal.fire({
+                title: 'Рассчитать оптимальный закуп?',
+                text: 'Оптимизация может занять некоторое время.',
+                type: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'OK',
+                cancelButtonText: 'Не сейчас',
+            }).then((result) => {
+                if(result.value) {
+                $('#reload-matrix-using-mivs').attr('disabled', 'disabled');
+
+                $('.large-loading').fadeIn('fast');
+
+                var params = {};
+                params["ids"] = selectedForMatrix;
+
+                var combinedSupplierIds = preferredSuppliers.concat(preferredFromMatrix.filter(function (item) {
+                    return preferredSuppliers.indexOf(item) < 0;
+                }));
+
+                $('.included-in-list').each(function (e, v) {
+                    var supId = parseInt($(v).attr("data-supplier-id"));
+
+                    if (!combinedSupplierIds.includes(supId) && $(v).is(':checked')) {
+                        combinedSupplierIds.push(supId)
+                    }
+
+
+                });
+
+                params["supplier_ids"] = combinedSupplierIds;
+
+                console.log(combinedSupplierIds);
+
+
+                params["matrix_supplier_ids"] = combinedSupplierIds;
+
+                params["urgent_procurement"] = urgentOnly;
+                params["pharmacy"] = pharmacyOnly;
+
+                $.ajax({
+                    "url": "/procurement/basket/call_mivs",
+                    data: {'values': JSON.stringify(params)},
+                    type: "post",
+                    dataType: "json",
+
+                    error: function (data) {
+                        alert("error");
+
+                        $('.large-loading').fadeOut('fast');
+                        $('#reload-matrix-using-mivs').removeAttr('disabled');
+                    },
+
+                    success: function (data) {
+
+                        console.log('data: ', data);
+
+                        if (data.status.toUpperCase() !== "ERROR") {
+
+                            $('#mivs-procurement-plan').empty();
+
+                            loadProcurementPlanData(data);
+
+                            $('#action-processing').hide();
+                            $('.large-loading').fadeOut('fast');
+
+                            $('#plan-grip').click();
+
+
+                        }
+
+                        else if (data.status.toUpperCase() !== "OPTIMAL") {
+                            console.log('data in error - ', data);
+                            var a = data["message"];
+                            Swal.fire({
+                                title: 'Рассчет закупа завершен неуспешно',
+                                text: a,
+                                type: 'warning',
+                                confirmButtonText: 'OK',
+                            });
+
+                            // $('#action-processing').hide();
+                            $('.large-loading').fadeOut('fast');
+
+                        }
+
+                        $("#outdated-plan").hide();
+
+                        $('#reload-matrix-using-mivs').removeAttr('disabled');
+
+
+                    }
+
+                });
+            }
+        })
+
+
+    }
+
+    });
+
+
+
+
+
+
+    $('#clear-basket').on('click', function() {
+
+
+        if (selectedForMatrix.length > 0) {
+            Swal.fire({
+            title: 'Очистить корзину?',
+            text: 'Все товары будут удалены из корзины!',
+            type: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'OK',
+            cancelButtonText: 'Нет',
+        }).then((result) => {
+          if (result.value) {
+            $('#clear-basket').attr('disabled', 'disabled');
+
+            $('.large-loading').fadeIn('fast');
+
+            $.ajax({
+                "url": "/procurement/basket/clear_basket",
+                type: "post",
+                dataType: "json",
+
+                error: function (data) {
+                    Swal.fire({
+                        title: 'Ошибка',
+                        text: '',
+                        type: 'error',
+                        confirmButtonText: 'OK'
+                    });
+
+                    $('.large-loading').fadeOut('fast');
+                },
+
+                success: function (data) {
+
+                    Swal.fire({
+                              title: 'Корзина очищена',
+                              text: '',
+                              type: 'success',
+                              confirmButtonText: 'OK'
+                            });
+
+                    $('.large-loading').fadeOut('fast');
+
+                    window.location.reload();
+
+                }
+
+            });
+          }
+        })
+
+        }
+
+        else {
+            Swal.fire({
+                title: 'Корзина пуста',
+                type: 'error',
+                confirmButtonText: 'OK'
+            })
+        }
+
+
+    });
+
+
+
+
+
+    // {#    ************************************************************************* #}
+    $('#test_mivs').on('click', function () {
+        console.log("sending to mivs...");
+        $.ajax({
+            "url": "/procurement/basket/call_mivs_test",
+            data: {'values': '1'},
+            type: "post",
+            dataType: "json",
+
+            error: function (data) {
+                alert("error");
+            },
+
+            success: function (data) {
+                console.log('received...');
+                console.log('mivs_data: ', data);
+            }
+        });
+    });
+
+</script>
+{% end %}

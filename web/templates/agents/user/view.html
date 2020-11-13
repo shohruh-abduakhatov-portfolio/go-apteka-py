@@ -1,0 +1,59 @@
+{% extends "../../base.html" %}
+{% block header %}
+
+{% end %}
+{% block body %}
+<div class="container">
+<div class="shadow p-4 mb-4 bg-white">
+    <div class="x-3 pb-md-4 mx-auto">
+        <h3 class="display-5 agent-header">
+            {% if "username" in user %} {{ user["username"] }} {% end %}
+            <a href="/agents/{{ agent["agent_id"] }}/users/{{ user["user_id"] }}/edit/" class="btn btn-warning">
+                <i class="fa fa-edit"></i> Редактировать
+            </a>
+        </h3>
+        <div class="agent-info">{{ user["first_name"] }} {% if "last_name" in user %} {{ user["last_name"] }} {% end %}</div>
+        <div class="agent-info"><span class="text-secondary">Организация:</span> <a href="/agents/{{ agent["agent_id"] }}/view/"><strong>{{ agent["company_name"] }}</strong></a></div>
+        <div class="agent-info"><span class="text-secondary">Рейтинг:</span> <strong class="text-success">{{ agent["rating"] }}</strong></div>
+        <div class="agent-info"><span class="text-secondary">ИНН:</span> <strong>{{ agent["inn"] }}</strong></div>
+        <div class="agent-info"><span class="text-secondary">МФО:</span> <strong>{{ agent["mfo"] }}</strong></div>
+        {% if agent["telegram_id"] != None %}
+        <div class="agent-info"><span class="text-secondary">Телеграм ID:</span> <strong>{{ agent["telegram_id"] }}</strong></div>
+        {% end %}
+        {% if "email" in user and user["email"] != None %}
+        <div class="agent-info"><span class="text-secondary">Email:</span> <strong>{{ user["email"] }}</strong></div>
+        {% end %}
+        <div>
+    </div>
+</div>
+</div>
+{% end %}
+
+{% block bottom %}
+<script>
+    $(document).ready(function() {
+        $('#agent_users').DataTable({
+          oLanguage: {
+            "sUrl": "https://cdn.datatables.net/plug-ins/1.10.19/i18n/Russian.json"
+          },
+          responsive: true,
+          serverSide: true,
+          createdRow: function( row, data, dataIndex ) {
+              var d = data[0];
+              $(row).attr('data-id', d);
+          },
+          ajax: '/agents/{{ agent["agent_id"] }}/users/data.json'
+    } );
+    $('#agent_users tbody').on( 'click', 'tr', function () {
+        var key = $(this).attr('data-id');
+        document.location = "//" + window.location.host + "/agents/" + key + "/view/";
+    } );
+    });
+
+    function areSameDate(d1, d2) {
+    return d1.getFullYear() == d2.getFullYear()
+        && d1.getMonth() == d2.getMonth()
+        && d1.getDate() == d2.getDate();
+}
+</script>
+{% end %}

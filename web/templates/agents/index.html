@@ -1,0 +1,63 @@
+{% extends "../base.html" %}
+{% block headline %} Агенты {% end %}
+{% block head %}
+
+{% end %}
+{% block body %}
+<div class="container">
+    <h3 class="pt-4 agent-header">Агенты <a href="/agents/register/" class="btn btn-primary">Добавить агента</a></h3>
+    <hr/>
+<table id="example" class="table table-striped table-bordered tasks-table" style="width:100%">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Название компании</th>
+            <th>Рейтинг</th>
+            <th>Частота</th>
+            <th>Телефон</th>
+        </tr>
+    </thead>
+    <tbody>
+    </tbody>
+    <tfoot>
+        <tr>
+            <th>ID</th>
+            <th>Название компании</th>
+            <th>Рейтинг</th>
+            <th>Частота</th>
+            <th>Телефон</th>
+        </tr>
+    </tfoot>
+</table>
+{% end %}
+
+{% block bottom %}
+<script>
+    $(document).ready(function() {
+        $('#example').DataTable({
+            oLanguage: {
+            "sUrl": "https://cdn.datatables.net/plug-ins/1.10.19/i18n/Russian.json"
+            },
+            createdRow: function( row, data, dataIndex ) {
+                var d = data[0];
+                $(row).attr('data-id', d);
+            },
+            responsive: true,
+            pageLength: 100,
+            serverSide: true,
+            ajax: '/agents/list/data.json',
+        } );
+
+        $('#example').delegate('tr', 'click', function(){
+            var key = $(this).attr('data-id');
+            document.location = "//" + window.location.host + "/agents/" + key + "/view/";
+        });
+    });
+
+    function areSameDate(d1, d2) {
+        return d1.getFullYear() == d2.getFullYear()
+            && d1.getMonth() == d2.getMonth()
+            && d1.getDate() == d2.getDate();
+    }
+</script>
+{% end %}

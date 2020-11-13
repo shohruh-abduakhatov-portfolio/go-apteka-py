@@ -1,0 +1,61 @@
+{% extends "../base.html" %}
+{% block header %}
+
+{% end %}
+{% block body %}
+<div class="container">
+<div class="shadow p-4 mb-4 bg-white">
+    <div class="x-3 pb-md-4 mx-auto">
+        <h3 class="display-5 agent-header">Поиск по фильтрам</h3>
+    <hr>
+    <div>
+    <p>Найти товары у которых не заполнено:</p>
+    <select id="missing-field" style="height:36px;">
+        <option value="description">Описание</option>
+        <option value="category">Категория</option>
+        <option value="manufacturer">Производитель</option>
+        <option value="manufacturer_country">Страна производитель</option>
+        <option value="manufacturer_id">Привязка к производителю</option>
+    </select>
+    <a href="#" id="search-missing-field" class="btn btn-primary">Найти</a>
+    </div>
+    <div id="output"></div>
+</div>
+</div>
+</div>
+{% end %}
+
+{% block bottom %}
+<script>
+$().ready(function(){
+    var token = Cookies.get('_xsrf');
+    $.ajaxSetup({
+        headers: {
+        'X-XSRFToken' : token
+    }});
+    $('#search-missing-field').click(function(e){
+        e.preventDefault();
+        $.ajax({
+            url: "/products/filtering/",
+            type: "post",
+            data: {"column": $('#missing-field').val()},
+            dataType: "json",
+            error: function (data) {
+                console.log(data);
+            },
+            success: function (data) {
+                console.log(data);
+                var html = "";
+                var products = data["data"];
+                for(var i=0;i<products.length; i++) {
+                    var product = products[i];
+                    html+='<a href="/products/' +product["product_id"] +'/view/">' +
+                    product["name"] + '</a><br/>'; 
+                }
+                $('#output').html(html);
+            }
+        });
+    });
+});
+</script>
+{% end %}
